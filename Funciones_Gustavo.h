@@ -5,5 +5,6 @@
 
 float formulaSatisfaccion(struct Comuna *comuna);
 float calcularSatisfaccion(struct Comuna *actual, int cantidadComunas);
+float calcularNecesidad(struct Comuna *comuna);
 
 #endif
