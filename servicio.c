@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bien.h"
+#include "servicio.h"
 
 /*
-Funcionamiento: reserva memoria para un bien nuevo y le carga sus datos
-iniciales.
-Entradas: nombre (texto con el nombre del bien), existencia (cantidad
+Funcionamiento: reserva memoria para un servicio nuevo y le carga sus
+datos iniciales.
+Entradas: nombre (texto con el nombre del servicio), existencia (cantidad
 inicial), maximo (tope que puede alcanzar), valor (indicador comunitario
 inicial)
-Salidas: puntero al bien creado
+Salidas: puntero al servicio creado
 */
-struct Bien *crearBien(char nombre[], int existencia, int maximo, float valor) {
-    struct Bien *nueva;
+struct Servicio *crearServicio(char nombre[], int existencia, int maximo, float valor) {
+    struct Servicio *nueva;
 
-    nueva = calloc(1, sizeof(struct Bien));
+    nueva = calloc(1, sizeof(struct Servicio));
     strcpy(nueva->nombre, nombre);
     nueva->existencia = existencia;
     nueva->maximo = maximo;
@@ -25,13 +25,13 @@ struct Bien *crearBien(char nombre[], int existencia, int maximo, float valor) {
 }
 
 /*
-Funcionamiento: inserta un bien al final de la lista enlazada simple.
-Entradas: lista (inicio actual de la lista), nueva (bien a insertar)
-Salidas: lista actualizada (la misma, o el bien nuevo como inicio si
+Funcionamiento: inserta un servicio al final de la lista enlazada simple.
+Entradas: lista (inicio actual de la lista), nueva (servicio a insertar)
+Salidas: lista actualizada (la misma, o el servicio nuevo como inicio si
 estaba vacia)
 */
-struct Bien *insertarBien(struct Bien *lista, struct Bien *nueva) {
-    struct Bien *actual;
+struct Servicio *insertarServicio(struct Servicio *lista, struct Servicio *nueva) {
+    struct Servicio *actual;
 
     if (lista == NULL) {
         return nueva;
@@ -47,12 +47,12 @@ struct Bien *insertarBien(struct Bien *lista, struct Bien *nueva) {
 }
 
 /*
-Funcionamiento: recorre la lista de bienes y cuenta cuantos hay.
+Funcionamiento: recorre la lista de servicios y cuenta cuantos hay.
 Entradas: lista (inicio de la lista)
-Salidas: cantidad de bienes en la lista
+Salidas: cantidad de servicios en la lista
 */
-int recorrerBienes(struct Bien *lista) {
-    struct Bien *actual;
+int recorrerServicios(struct Servicio *lista) {
+    struct Servicio *actual;
     int cantidad;
 
     cantidad = 0;
@@ -66,12 +66,13 @@ int recorrerBienes(struct Bien *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista de bienes e imprime los datos de cada uno.
+Funcionamiento: recorre la lista de servicios e imprime los datos de cada
+uno.
 Entradas: lista (inicio de la lista)
 Salidas: ninguna (imprime en pantalla)
 */
-void mostrarBienes(struct Bien *lista) {
-    struct Bien *actual;
+void mostrarServicios(struct Servicio *lista) {
+    struct Servicio *actual;
 
     actual = lista;
     while (actual != NULL) {
@@ -82,14 +83,14 @@ void mostrarBienes(struct Bien *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista de bienes y libera la memoria de cada
+Funcionamiento: recorre la lista de servicios y libera la memoria de cada
 nodo, uno por uno, para no dejar fugas de memoria.
 Entradas: lista (inicio de la lista)
 Salidas: ninguna (libera memoria)
 */
-void liberarBienes(struct Bien *lista) {
-    struct Bien *actual;
-    struct Bien *siguiente;
+void liberarServicios(struct Servicio *lista) {
+    struct Servicio *actual;
+    struct Servicio *siguiente;
 
     actual = lista;
     while (actual != NULL) {
@@ -100,17 +101,17 @@ void liberarBienes(struct Bien *lista) {
 }
 
 /*
-Funcionamiento: abre el archivo de bienes, lee un nombre por linea y
+Funcionamiento: abre el archivo de servicios, lee un nombre por linea y
 construye la lista enlazada simple del catalogo base. La existencia, el
 maximo y el valor quedan en 0 porque todavia no se sabe a que comuna van
 a pertenecer ni cuantas personas tiene esa comuna.
 Entradas: nombreArchivo (ruta o nombre del archivo a leer)
-Salidas: puntero al inicio de la lista de bienes cargada
+Salidas: puntero al inicio de la lista de servicios cargada
 */
-struct Bien *leerBienes(char nombreArchivo[]) {
+struct Servicio *leerServicios(char nombreArchivo[]) {
     FILE *archivo;
-    struct Bien *lista;
-    struct Bien *nueva;
+    struct Servicio *lista;
+    struct Servicio *nueva;
     char linea[50];
     int longitud;
 
@@ -127,8 +128,8 @@ struct Bien *leerBienes(char nombreArchivo[]) {
         if (longitud > 0 && linea[longitud - 1] == '\n') {
             linea[longitud - 1] = '\0';
         }
-        nueva = crearBien(linea, 0, 0, 0);
-        lista = insertarBien(lista, nueva);
+        nueva = crearServicio(linea, 0, 0, 0);
+        lista = insertarServicio(lista, nueva);
     }
 
     fclose(archivo);

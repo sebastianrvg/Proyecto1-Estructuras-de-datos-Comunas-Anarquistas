@@ -56,4 +56,14 @@ Salidas: ninguna (libera memoria)
 */
 void liberarBienes(struct Bien *lista);
 
+/*
+Funcionamiento: abre el archivo de bienes, lee un nombre por linea y
+construye la lista enlazada simple del catalogo base. La existencia, el
+maximo y el valor quedan en 0 porque todavia no se sabe a que comuna van
+a pertenecer ni cuantas personas tiene esa comuna.
+Entradas: nombreArchivo (ruta o nombre del archivo a leer)
+Salidas: puntero al inicio de la lista de bienes cargada
+*/
+struct Bien *leerBienes(char nombreArchivo[]);
+
 #endif
