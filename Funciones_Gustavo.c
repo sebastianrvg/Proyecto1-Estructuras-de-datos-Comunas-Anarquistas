@@ -164,3 +164,88 @@ float calcularNecesidad(struct Comuna *comuna) {
 
     return necesidad;
 }
+
+void actualizarIndices(struct Comuna *inicio, int cantidadComunas) {
+    /*
+    Funcionamiento: recorre todas las comunas de la lista circular y les
+    actualiza su necesidad y satisfaccion usando las formulas.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular),
+    cantidadComunas (numero total de comunas en la lista)
+    Salidas: ninguna (actualiza directamente cada comuna->necesidad y comuna->satisfaccion)
+    */
+    struct Comuna *actual = inicio;
+    struct Comuna *comuna_inicial = inicio;
+
+    while (1) {
+        calcularNecesidad(actual);
+        calcularSatisfaccion(actual, cantidadComunas);
+
+        actual = actual->siguiente;
+
+        if (actual == comuna_inicial) {
+            break;
+        }
+    }
+}
+
+void aplicarConsumo(struct Comuna *comuna) {
+    /*
+    Funcionamiento: reduce la cantidad de cada bien de la comuna segun lo que
+    consumieron sus personas en el turno.
+    Entradas: comuna (puntero a la comuna que va a consumir sus bienes)
+    Salidas: ninguna (actualiza directamente cada bien->cantidad)
+    */
+    struct Recursos *actual = comuna->bienes;
+    int personas = 0;
+    int consumo = 0;
+
+    personas = recorrerPersonas(comuna->personas);
+
+    while (actual != NULL) {
+        consumo = 0;
+        for (int i = 0; i < personas; i++) {
+            consumo = consumo + (rand() % 5) + 1;
+        }
+
+        actual->cantidad = actual->cantidad - consumo;
+        if (actual->cantidad < 0) {
+            actual->cantidad = 0;
+        }
+
+        actual = actual->siguiente;
+    }
+}
+
+void aplicarConsumoTodas(struct Comuna *inicio) {
+    /*
+    Funcionamiento: recorre todas las comunas de la lista circular y les
+    aplica el consumo de bienes a cada una.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular)
+    Salidas: ninguna (actualiza directamente los bienes de cada comuna)
+    */
+    struct Comuna *actual = inicio;
+    struct Comuna *comuna_inicial = inicio;
+
+    while (1) {
+        aplicarConsumo(actual);
+
+        actual = actual->siguiente;
+
+        if (actual == comuna_inicial) {
+            break;
+        }
+    }
+}
+
+void pasarTurno(struct Comuna *inicio, int cantidadComunas) {
+    /*
+    Funcionamiento: aplica el consumo de bienes a todas las comunas y luego
+    actualiza sus indices de necesidad y satisfaccion, en ese orden. Se usa
+    cuando el jugador pasa al siguiente dia.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular),
+    cantidadComunas (numero total de comunas en la lista)
+    Salidas: ninguna
+    */
+    aplicarConsumoTodas(inicio);
+    actualizarIndices(inicio, cantidadComunas);
+}
