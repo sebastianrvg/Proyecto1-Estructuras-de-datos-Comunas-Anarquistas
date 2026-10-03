@@ -4,6 +4,13 @@
 #include "Nodos.h"
 
 struct Recursos *crearRecurso(char nombre[], int cantidad, int cantidadMaxima) {
+    /*
+    Funcionamiento: reserva memoria para un nuevo recurso y copia su nombre, cantidad y cantidad máxima.
+    Entradas: nombre (texto con el nombre del recurso),
+              cantidad (cantidad actual del recurso),
+              cantidadMaxima (cantidad máxima que puede ser almacenada)
+    Salidas: puntero al recurso creado
+    */
     struct Recursos *nuevo;
     nuevo = calloc(1, sizeof(struct Recursos));
     strncpy(nuevo->nombre, nombre, sizeof(nuevo->nombre) - 1);
@@ -14,6 +21,13 @@ struct Recursos *crearRecurso(char nombre[], int cantidad, int cantidadMaxima) {
 }
 
 struct Servicios *crearServicio(char nombre[], int cantidad, int cantidadMaxima) {
+    /*
+    Funcionamiento: reserva memoria para un nuevo servicio y copia su nombre, cantidad y cantidad máxima.
+    Entradas: nombre (texto con el nombre del servicio),
+              cantidad (cantidad actual del servicio),
+              cantidadMaxima (cantidad máxima que puede ser ofrecida)
+    Salidas: puntero al servicio creado
+    */
     struct Servicios *nuevo;
     nuevo = calloc(1, sizeof(struct Servicios));
     strncpy(nuevo->nombre, nombre, sizeof(nuevo->nombre) - 1);
@@ -24,6 +38,12 @@ struct Servicios *crearServicio(char nombre[], int cantidad, int cantidadMaxima)
 }
 
 struct Comuna *crearNodoCircular(struct Comuna *lista, char nombre[]) {
+    /*
+    Funcionamiento: reserva memoria para una nueva comuna y copia su nombre. Inserta la comuna en una lista circular de comunas.
+    Entradas: lista (puntero al inicio de la lista circular de comunas),
+              nombre (texto con el nombre de la comuna)
+    Salidas: puntero al inicio de la lista circular de comunas (puede ser la nueva comuna si la lista estaba vacía)
+    */
     struct Comuna *nueva = NULL;
     struct Comuna *actual = NULL;
     nueva = calloc(1, sizeof(struct Comuna));

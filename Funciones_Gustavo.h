@@ -12,5 +12,6 @@ void aplicarConsumoTodas(struct Comuna *inicio);
 void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia);
 void generarEmergencia(struct Comuna *actual, int cantidadComunas);
 void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia);
+void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, char *nombre_buscado, int cantidad_buscada);
 
 #endif

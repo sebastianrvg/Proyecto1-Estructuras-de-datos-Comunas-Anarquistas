@@ -85,22 +85,22 @@ float calcularSatisfaccion(struct Comuna *actual, int cantidadComunas) {
 
     // Calcular la satisfacción de las comunas vecinas
     if (cantidadComunas >= 5) { // Si hay 5 o más comunas, se consideran las 4 vecinas más cercanas
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 2, cantidadComunas));
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas));
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas));
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 2, cantidadComunas));
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 2, cantidadComunas)); // Vecina anterior
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas)); // Vecina anterior
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas)); // Vecina siguiente
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 2, cantidadComunas)); // Vecina siguiente
         cantidad_vecinas = 4;
     } else if (cantidadComunas == 4) { // Si hay 4 comunas, se consideran las 3 vecinas más cercanas
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 2, cantidadComunas));
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas));
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas));
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 2, cantidadComunas)); // Vecina anterior
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas)); // Vecina anterior
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas)); // Vecina siguiente
         cantidad_vecinas = 3;
     } else if (cantidadComunas == 3) { // Si hay 3 comunas, se consideran las 2 vecinas más cercanas
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas));
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas));
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas)); // Vecina anterior
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas)); // Vecina siguiente
         cantidad_vecinas = 2;
     } else if (cantidadComunas == 2) { // Si hay 2 comunas, se considera la única vecina
-        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas));
+        suma_vecinas = suma_vecinas + formulaSatisfaccion(avanzarComunas(actual, 1, cantidadComunas)); // Vecina siguiente
         cantidad_vecinas = 1;
     }
 
@@ -167,10 +167,9 @@ float calcularNecesidad(struct Comuna *comuna) {
 
 void actualizarIndices(struct Comuna *inicio, int cantidadComunas) {
     /*
-    Funcionamiento: recorre todas las comunas de la lista circular y les
-    actualiza su necesidad y satisfaccion usando las formulas.
+    Funcionamiento: recorre todas las comunas de la lista circular y les actualiza su necesidad y satisfaccion usando las formulas.
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
-    cantidadComunas (numero total de comunas en la lista)
+              cantidadComunas (numero total de comunas en la lista)
     Salidas: ninguna (actualiza directamente cada comuna->necesidad y comuna->satisfaccion)
     */
     struct Comuna *actual = inicio;
@@ -190,8 +189,7 @@ void actualizarIndices(struct Comuna *inicio, int cantidadComunas) {
 
 void aplicarConsumo(struct Comuna *comuna) {
     /*
-    Funcionamiento: reduce la cantidad de cada bien de la comuna segun lo que
-    consumieron sus personas en el turno.
+    Funcionamiento: reduce la cantidad de cada bien de la comuna segun lo que consumieron sus personas en el turno.
     Entradas: comuna (puntero a la comuna que va a consumir sus bienes)
     Salidas: ninguna (actualiza directamente cada bien->cantidad)
     */
@@ -218,8 +216,7 @@ void aplicarConsumo(struct Comuna *comuna) {
 
 void aplicarConsumoTodas(struct Comuna *inicio) {
     /*
-    Funcionamiento: recorre todas las comunas de la lista circular y les
-    aplica el consumo de bienes a cada una.
+    Funcionamiento: recorre todas las comunas de la lista circular y les aplica el consumo de bienes a cada una.
     Entradas: inicio (puntero a cualquier comuna de la lista circular)
     Salidas: ninguna (actualiza directamente los bienes de cada comuna)
     */
@@ -241,7 +238,7 @@ void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
     /*
     Funcionamiento: genera una emergencia aleatoria en la comuna actual y, si es grave, también afecta a las comunas vecinas
     Entradas: actual (puntero a la comuna donde ocurre la emergencia),
-    cantidadComunas (número total de comunas en la lista circular)
+              cantidadComunas (número total de comunas en la lista circular)
     Salidas: ninguna (actualiza directamente los bienes o servicios de la comuna y sus vecinas)
     */
     int tipo_emergencia = 0;
@@ -251,7 +248,7 @@ void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
     struct Comuna *siguiente = NULL;
     struct Comuna *anterior = NULL;
 
-    tipo_emergencia = (rand() % 5) + 1;
+    tipo_emergencia = (rand() % 5) + 1; // se selecciona un tipo de emergencia aleatorio entre 1 y 5
 
     if (tipo_emergencia == 1) {
         nombre_emergencia = "un incendio";
@@ -275,12 +272,15 @@ void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
         grave = 1;
     }
 
+    // Aplicar la emergencia a la comuna actual
     alcanceEmergencia(actual, perdida, nombre_emergencia);
 
+    // Si la emergencia es grave, también se aplica a las comunas vecinas
     if (grave == 1 && cantidadComunas >= 2) {
         siguiente = avanzarComunas(actual, 1, cantidadComunas);
         alcanceEmergencia(siguiente, perdida, nombre_emergencia);
 
+        // Si hay al menos 3 comunas, también se aplica a la comuna anterior
         if (cantidadComunas >= 3) {
             anterior = avanzarComunas(actual, cantidadComunas - 1, cantidadComunas);
             alcanceEmergencia(anterior, perdida, nombre_emergencia);
@@ -292,41 +292,164 @@ void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turno
     /*
     Funcionamiento: genera una emergencia aleatoria en una comuna aleatoria, y si es grave, también afecta a las comunas vecinas. 
     Entradas: inicio (puntero a cualquier comuna de la lista circular), 
-    cantidadComunas (número total de comunas en la lista circular), 
-    turnosHastaEmergencia (puntero a un entero que indica cuántos turnos faltan para que ocurra la próxima emergencia)
+              cantidadComunas (número total de comunas en la lista circular), 
+              turnosHastaEmergencia (puntero a un entero que indica cuántos turnos faltan para que ocurra la próxima emergencia)
     Salidas: ninguna (actualiza directamente los bienes o servicios de la comuna y sus vecinas, y actualiza el valor de turnosHastaEmergencia)
     */
     int indiceComuna = 0;
     struct Comuna *actual = NULL;
 
-    *turnosHastaEmergencia = *turnosHastaEmergencia - 1;
+    *turnosHastaEmergencia = *turnosHastaEmergencia - 1; // Disminuir el contador de turnos hasta la próxima emergencia
 
-    if (*turnosHastaEmergencia > 0) {
+    if (*turnosHastaEmergencia > 0) { //
         return;
     }
 
-    indiceComuna = rand() % cantidadComunas;
+    indiceComuna = rand() % cantidadComunas; // Seleccionar una comuna aleatoria para la emergencia
 
     actual = inicio;
+    // Avanzar hasta la comuna seleccionada
     for (int i = 0; i < indiceComuna; i++) {
         actual = actual->siguiente;
     }
 
     generarEmergencia(actual, cantidadComunas);
 
-    *turnosHastaEmergencia = (rand() % 4) + 4;
+    *turnosHastaEmergencia = (rand() % 4) + 4; // Reiniciar el contador de turnos hasta la próxima emergencia (entre 4 y 7 turnos)
 }
 
 void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia) {
     /*
-    Funcionamiento: aplica el consumo de bienes a todas las comunas y luego
-    actualiza sus indices de necesidad y satisfaccion, en ese orden. Se usa
-    cuando el jugador pasa al siguiente dia.
+    Funcionamiento: aplica el consumo de bienes a todas las comunas, luego actualiza sus indices de necesidad y satisfaccion y finalmente controla si ocurre una emergencia en alguna comuna.
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
-    cantidadComunas (numero total de comunas en la lista)
+              cantidadComunas (numero total de comunas en la lista)
     Salidas: ninguna
     */
     aplicarConsumoTodas(inicio);
     actualizarIndices(inicio, cantidadComunas);
     controlarEmergencias(inicio, cantidadComunas, turnosHastaEmergencia);
+}
+
+// Todavia no esta terminado no tiene para hacer intercambio de personas.
+void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, char *nombre_buscado, int cantidad_buscada) {
+    /*
+    Funcionamiento: Permite a una comuna solicitar un recurso a otra comuna a cambio de otro recurso
+    Entradas: comunaSolicitante (puntero a la comuna que solicita el recurso),
+              comunaProveedora (puntero a la comuna que provee el recurso),
+              nombre_buscado (nombre del recurso que se solicita),
+              cantidad_buscada (cantidad del recurso que se solicita)
+    Salidas: ninguna (actualiza directamente los bienes de ambas comunas)
+    */
+    struct Recursos *B_recurso_proveedora = NULL; // Puntero al recurso que la comuna proveedora tiene y que la comuna solicitante quiere
+
+    struct Recursos *B_recurso_pedido = NULL; // Puntero al recurso con menor cantidad en la comuna proveedora, el que ella pedira a cambio
+
+    struct Recursos *A_recurso_solicitante = NULL; // Puntero al recurso que la comuna solicitante tiene y que la comuna proveedora quiere
+
+    struct Recursos *A_recurso_solicitante_recibe = NULL; // Puntero al recurso que la comuna solicitante recibirá de la comuna proveedora
+
+    int B_personas_proveedora = 0; // Cantidad de personas en la comuna proveedora
+
+    int A_personas_solicitante = 0; // Cantidad de personas en la comuna solicitante
+
+    int cantidad_pedida = 0; // Cantidad del recurso que la comuna solicitante debe dar a cambio
+
+    int extra = 0; // Cantidad extra que la comuna solicitante debe dar a cambio si hay un aumento aleatorio
+
+    int puede_dar = 0; // Variable para verificar si la comuna proveedora puede dar el recurso sin quedar en riesgo
+
+    int probabilidad_extra = 0; // Variable para determinar si hay un aumento aleatorio en la cantidad pedida
+
+    float bono_flotante = 0; // Variable para calcular el bono flotante que se dará a la comuna solicitante y proveedora
+
+    int A_bono_solicitante = 0; // Variable para almacenar el bono que recibirá la comuna solicitante
+
+    int B_bono_proveedora = 0; // Variable para almacenar el bono que recibirá la comuna proveedora
+
+    // Buscar el recurso solicitado en la comuna proveedora
+    B_recurso_proveedora = buscarRecurso(comunaProveedora->bienes, nombre_buscado);
+    if (B_recurso_proveedora == NULL) {
+        printf("No se pudo hacer el trueque: %s no tiene %s.\n", comunaProveedora->nombre, nombre_buscado);
+        return;
+    }
+
+    // Verificar si la comuna proveedora puede dar el servicio sin quedar en riesgo
+    B_personas_proveedora = recorrerPersonas(comunaProveedora->personas);
+    puede_dar = puedeDarRecurso(B_recurso_proveedora, B_personas_proveedora, cantidad_buscada);
+    if (puede_dar == 0) {
+        printf("No se pudo hacer el trueque: %s no puede dar %s sin quedar en riesgo.\n", comunaProveedora->nombre, nombre_buscado);
+        return;
+    }
+
+    // Buscar un recurso alternativo en la comuna proveedora que no sea el recurso solicitado
+    B_recurso_pedido = encontrarRecursoMasBajo(comunaProveedora->bienes, nombre_buscado);
+    if (B_recurso_pedido == NULL) {
+        printf("No se pudo hacer el trueque: %s no tiene otro bien para pedir a cambio.\n", comunaProveedora->nombre);
+        return;
+    }
+
+    cantidad_pedida = cantidad_buscada; // La cantidad pedida es igual a la cantidad buscada inicialmente
+
+    // Determinar si hay un aumento aleatorio en la cantidad pedida (25% de probabilidad)
+    probabilidad_extra = rand() % 4;
+    if (probabilidad_extra == 0) {
+        extra = (rand() % 4) + 2;
+        cantidad_pedida = cantidad_pedida + extra;
+    }
+
+    // Buscar el recurso que la comuna solicitante tiene y que la comuna proveedora quiere
+    A_recurso_solicitante = buscarRecurso(comunaSolicitante->bienes, B_recurso_pedido->nombre);
+    if (A_recurso_solicitante == NULL) {
+        printf("No se pudo hacer el trueque: %s no tiene %s para dar a cambio.\n", comunaSolicitante->nombre, B_recurso_pedido->nombre);
+        return;
+    }
+
+    // Verificar si la comuna solicitante puede dar el recurso sin quedar en riesgo
+    A_personas_solicitante = recorrerPersonas(comunaSolicitante->personas);
+    puede_dar = puedeDarRecurso(A_recurso_solicitante, A_personas_solicitante, cantidad_pedida);
+    if (puede_dar == 0) {
+        printf("No se pudo hacer el trueque: %s no puede dar %d de %s a cambio.\n", comunaSolicitante->nombre, cantidad_pedida, B_recurso_pedido->nombre);
+        return;
+    }
+
+    // Buscar el recurso que la comuna solicitante recibirá de la comuna proveedora
+    A_recurso_solicitante_recibe = buscarRecurso(comunaSolicitante->bienes, B_recurso_proveedora->nombre);
+    if (A_recurso_solicitante_recibe == NULL) {
+        printf("No se pudo hacer el trueque: %s no tiene %s para recibir.\n", comunaSolicitante->nombre, B_recurso_proveedora->nombre);
+        return;
+    }
+
+    // Calcular el bono para la comuna solicitante según la cantidad de recursos intercambiados
+    bono_flotante = 0.3 * cantidad_buscada;
+    A_bono_solicitante = (int) bono_flotante;
+    if (bono_flotante > A_bono_solicitante) {
+        A_bono_solicitante = A_bono_solicitante + 1;
+    }
+
+    // Calcular el bono para la comuna proveedora según la cantidad de recursos intercambiados
+    bono_flotante = 0.3 * cantidad_pedida;
+    B_bono_proveedora = (int) bono_flotante;
+    if (bono_flotante > B_bono_proveedora) {
+        B_bono_proveedora = B_bono_proveedora + 1;
+    }
+
+    // Actualizar las cantidades de los recursos en ambas comunas después del trueque
+    B_recurso_proveedora->cantidad = B_recurso_proveedora->cantidad - cantidad_buscada;
+
+    // Actualizar la cantidad del recurso que la comuna solicitante recibirá, asegurándose de no exceder la cantidad máxima
+    A_recurso_solicitante_recibe->cantidad = A_recurso_solicitante_recibe->cantidad + cantidad_buscada + A_bono_solicitante;
+    if (A_recurso_solicitante_recibe->cantidad > A_recurso_solicitante_recibe->cantidadMaxima) {
+        A_recurso_solicitante_recibe->cantidad = A_recurso_solicitante_recibe->cantidadMaxima;
+    }
+
+    // Actualizar la cantidad del recurso que la comuna solicitante dará a cambio
+    A_recurso_solicitante->cantidad = A_recurso_solicitante->cantidad - cantidad_pedida;
+
+    // Actualizar la cantidad del recurso que la comuna proveedora recibirá, asegurándose de no exceder la cantidad máxima
+    B_recurso_pedido->cantidad = B_recurso_pedido->cantidad + cantidad_pedida + B_bono_proveedora;
+    if (B_recurso_pedido->cantidad > B_recurso_pedido->cantidadMaxima) {
+        B_recurso_pedido->cantidad = B_recurso_pedido->cantidadMaxima;
+    }
+
+    printf("Trueque exitoso: %s le dio %d de %s a %s, y recibio %d de %s.\n", comunaProveedora->nombre, cantidad_buscada, nombre_buscado, comunaSolicitante->nombre, cantidad_pedida, B_recurso_pedido->nombre);
 }
