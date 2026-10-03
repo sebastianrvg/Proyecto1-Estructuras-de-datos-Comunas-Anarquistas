@@ -22,6 +22,7 @@ void calcularPuntosRecursos(struct Recursos *lista, int personas, int *suma_punt
 
     // Contar la estimación de recursos necesarios para 2 turnos
     while (actual != NULL) {
+        estimado_1_turno = 0;
         // Estimar la cantidad de recursos necesarios para 1 turno y luego multiplicar por 2
         for (int i = 0; i < personas; i++) {
             estimado_1_turno += (rand() % 5) + 1; // Simulación de consumo de recursos por persona (1 a 5 unidades)
@@ -43,7 +44,13 @@ void calcularPuntosRecursos(struct Recursos *lista, int personas, int *suma_punt
             }
         }
 
-        //
+        if (puntos == -1) {
+            actual->emergencias = 1;
+        } else {
+            actual->emergencias = 0;
+        }
+
+        // Actualizar la suma de puntos si no es una emergencia
         if (puntos != -1) {
             *suma_puntos = *suma_puntos + puntos;
         }
@@ -101,11 +108,90 @@ void calcularPuntosServicios(struct Servicios *lista, int personas, int *suma_pu
             puntos = 2;
         }
 
+        if (puntos == -1) {
+            actual->emergencias = 1;
+        } else {
+            actual->emergencias = 0;
+        }
+
         // Actualizar la suma de puntos si no es una emergencia
         if (puntos != -1) {
             *suma_puntos = *suma_puntos + puntos;
         }
 
         actual = actual->siguiente;
+    }
+}
+
+void alcanceEmergencia(struct Comuna *comuna, int perdida, char *nombre_emergencia) {
+    /*
+    Funcionamiento: Aplica el efecto de una emergencia a un recurso o servicio aleatorio de la comuna
+    Entradas: comuna (puntero a la comuna afectada), 
+    perdida (cantidad de unidades perdidas), 
+    nombre_emergencia (nombre de la emergencia)
+    Salidas: ninguna (actualiza directamente los bienes o servicios de la comuna)
+    */
+    int bien_seleccionado = 0;
+    int cantidadNodos = 0;
+    int indice = 0;
+
+    bien_seleccionado = rand() % 2;
+
+    if (bien_seleccionado == 1) {
+        struct Recursos *actual = comuna->bienes;
+
+        while (actual != NULL) {
+            cantidadNodos = cantidadNodos + 1;
+            actual = actual->siguiente;
+        }
+
+        if (cantidadNodos == 0) {
+            return;
+        }
+
+        indice = rand() % cantidadNodos;
+        actual = comuna->bienes;
+        for (int i = 0; i < indice; i++) {
+            actual = actual->siguiente;
+        }
+
+        if (actual->emergencias == 1) {
+            printf("Ha ocurrido %s en %s. El bien %s ya estaba en emergencia y perdio %d unidades mas.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+        } else {
+            printf("Ha ocurrido %s en %s. Se vio afectado el bien %s, se perdieron %d unidades.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+        }
+
+        actual->cantidad = actual->cantidad - perdida;
+        if (actual->cantidad < 0) {
+            actual->cantidad = 0;
+        }
+    } else {
+        struct Servicios *actual = comuna->servicios;
+
+        while (actual != NULL) {
+            cantidadNodos = cantidadNodos + 1;
+            actual = actual->siguiente;
+        }
+
+        if (cantidadNodos == 0) {
+            return;
+        }
+
+        indice = rand() % cantidadNodos;
+        actual = comuna->servicios;
+        for (int i = 0; i < indice; i++) {
+            actual = actual->siguiente;
+        }
+
+        if (actual->emergencias == 1) {
+            printf("Ha ocurrido %s en %s. El servicio %s ya estaba en emergencia y perdio %d unidades mas.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+        } else {
+            printf("Ha ocurrido %s en %s. Se vio afectado el servicio %s, se perdieron %d unidades.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+        }
+
+        actual->cantidad = actual->cantidad - perdida;
+        if (actual->cantidad < 0) {
+            actual->cantidad = 0;
+        }
     }
 }

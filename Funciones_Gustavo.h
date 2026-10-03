@@ -9,6 +9,8 @@ float calcularNecesidad(struct Comuna *comuna);
 void actualizarIndices(struct Comuna *inicio, int cantidadComunas);
 void aplicarConsumo(struct Comuna *comuna);
 void aplicarConsumoTodas(struct Comuna *inicio);
-void pasarTurno(struct Comuna *inicio, int cantidadComunas);
+void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia);
+void generarEmergencia(struct Comuna *actual, int cantidadComunas);
+void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia);
 
 #endif

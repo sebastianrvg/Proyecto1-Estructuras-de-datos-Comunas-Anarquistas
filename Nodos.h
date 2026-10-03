@@ -10,6 +10,7 @@ struct Recursos {
     char nombre[50]; // Nombre del recurso
     int cantidad; // Cantidad actual del recurso
     int cantidadMaxima; // Cantidad máxima que puede ser almacenada
+    int emergencias; // Cantidad de emergencias que han ocurrido con este recurso
     struct Recursos *siguiente; 
 };
 
@@ -22,6 +23,7 @@ struct Servicios {
     char nombre[50]; // Nombre del servicio
     int cantidad; // Cantidad actual del servicio
     int cantidadMaxima; // Cantidad máxima que puede ser ofrecida
+    int emergencias; // Cantidad de emergencias que han ocurrido con este servicio
     struct Servicios *siguiente;
 };
 

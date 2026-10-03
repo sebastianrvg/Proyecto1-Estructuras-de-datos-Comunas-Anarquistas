@@ -237,7 +237,87 @@ void aplicarConsumoTodas(struct Comuna *inicio) {
     }
 }
 
-void pasarTurno(struct Comuna *inicio, int cantidadComunas) {
+void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
+    /*
+    Funcionamiento: genera una emergencia aleatoria en la comuna actual y, si es grave, también afecta a las comunas vecinas
+    Entradas: actual (puntero a la comuna donde ocurre la emergencia),
+    cantidadComunas (número total de comunas en la lista circular)
+    Salidas: ninguna (actualiza directamente los bienes o servicios de la comuna y sus vecinas)
+    */
+    int tipo_emergencia = 0;
+    int perdida = 0;
+    char *nombre_emergencia = "";
+    int grave = 0;
+    struct Comuna *siguiente = NULL;
+    struct Comuna *anterior = NULL;
+
+    tipo_emergencia = (rand() % 5) + 1;
+
+    if (tipo_emergencia == 1) {
+        nombre_emergencia = "un incendio";
+        perdida = (rand() % 5) + 1;
+        grave = 0;
+    } else if (tipo_emergencia == 2) {
+        nombre_emergencia = "una inundacion";
+        perdida = (rand() % 5) + 2;
+        grave = 0;
+    } else if (tipo_emergencia == 3) {
+        nombre_emergencia = "una sequia";
+        perdida = (rand() % 4) + 3;
+        grave = 0;
+    } else if (tipo_emergencia == 4) {
+        nombre_emergencia = "un terremoto";
+        perdida = (rand() % 5) + 3;
+        grave = 1;
+    } else {
+        nombre_emergencia = "una revolucion";
+        perdida = (rand() % 5) + 4;
+        grave = 1;
+    }
+
+    alcanceEmergencia(actual, perdida, nombre_emergencia);
+
+    if (grave == 1 && cantidadComunas >= 2) {
+        siguiente = avanzarComunas(actual, 1, cantidadComunas);
+        alcanceEmergencia(siguiente, perdida, nombre_emergencia);
+
+        if (cantidadComunas >= 3) {
+            anterior = avanzarComunas(actual, cantidadComunas - 1, cantidadComunas);
+            alcanceEmergencia(anterior, perdida, nombre_emergencia);
+        }
+    }
+}
+
+void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia) {
+    /*
+    Funcionamiento: genera una emergencia aleatoria en una comuna aleatoria, y si es grave, también afecta a las comunas vecinas. 
+    Entradas: inicio (puntero a cualquier comuna de la lista circular), 
+    cantidadComunas (número total de comunas en la lista circular), 
+    turnosHastaEmergencia (puntero a un entero que indica cuántos turnos faltan para que ocurra la próxima emergencia)
+    Salidas: ninguna (actualiza directamente los bienes o servicios de la comuna y sus vecinas, y actualiza el valor de turnosHastaEmergencia)
+    */
+    int indiceComuna = 0;
+    struct Comuna *actual = NULL;
+
+    *turnosHastaEmergencia = *turnosHastaEmergencia - 1;
+
+    if (*turnosHastaEmergencia > 0) {
+        return;
+    }
+
+    indiceComuna = rand() % cantidadComunas;
+
+    actual = inicio;
+    for (int i = 0; i < indiceComuna; i++) {
+        actual = actual->siguiente;
+    }
+
+    generarEmergencia(actual, cantidadComunas);
+
+    *turnosHastaEmergencia = (rand() % 4) + 4;
+}
+
+void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia) {
     /*
     Funcionamiento: aplica el consumo de bienes a todas las comunas y luego
     actualiza sus indices de necesidad y satisfaccion, en ese orden. Se usa
@@ -248,4 +328,5 @@ void pasarTurno(struct Comuna *inicio, int cantidadComunas) {
     */
     aplicarConsumoTodas(inicio);
     actualizarIndices(inicio, cantidadComunas);
+    controlarEmergencias(inicio, cantidadComunas, turnosHastaEmergencia);
 }
