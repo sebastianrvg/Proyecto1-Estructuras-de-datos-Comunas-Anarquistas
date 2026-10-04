@@ -283,3 +283,88 @@ int puedeDarRecurso(struct Recursos *recurso, int personas, int cantidadARestar)
 
     return 1;
 }
+
+struct Servicios *buscarServicio(struct Servicios *lista, char *nombre) {
+    /*
+    Funcionamiento: Busca un servicio en la lista de servicios de una comuna por su nombre
+    Entradas: lista (puntero al inicio de la lista de servicios),
+              nombre (nombre del servicio a buscar)
+    Salidas: puntero al servicio encontrado, o NULL si no se encuentra
+    */
+    struct Servicios *actual = lista; // Puntero para recorrer la lista de servicios
+    int son_iguales = 0; // Variable para almacenar el resultado de la comparación de nombres
+
+    // Recorrer la lista de servicios hasta encontrar el servicio con el nombre especificado
+    while (actual != NULL) {
+        son_iguales = strcmp(actual->nombre, nombre);
+        if (son_iguales == 0) {
+            return actual;
+        }
+        actual = actual->siguiente;
+    }
+
+    return NULL;
+}
+
+struct Servicios *encontrarServicioMasBajo(struct Servicios *lista, char *nombre_excluir) {
+    /*
+    Funcionamiento: Encuentra el servicio con la menor cantidad en la lista de servicios, excluyendo un servicio específico por su nombre
+    Entradas: lista (puntero al inicio de la lista de servicios),
+              nombre_excluir (nombre del servicio a excluir de la búsqueda)
+    Salidas: puntero al servicio con la menor cantidad, o NULL si no se encuentra
+    */
+    struct Servicios *actual = lista; // Puntero para recorrer la lista de servicios
+    struct Servicios *mas_bajo = NULL; // Puntero para almacenar el servicio con la menor cantidad encontrado hasta ahora
+    int son_iguales = 0; // Variable para almacenar el resultado de la comparación de nombres
+
+    // Recorrer la lista de servicios para encontrar el de menor cantidad, excluyendo el servicio especificado
+    while (actual != NULL) {
+        son_iguales = strcmp(actual->nombre, nombre_excluir);
+        if (son_iguales != 0) {
+            if (mas_bajo == NULL || actual->cantidad < mas_bajo->cantidad) {
+                mas_bajo = actual;
+            }
+        }
+        actual = actual->siguiente;
+    }
+
+    return mas_bajo;
+}
+
+int puedeDarServicio(struct Servicios *lista, struct Servicios *servicio, int personas, int cantidadARestar) {
+    /*
+    Funcionamiento: Determina si un servicio puede ser dado sin dejar a la comuna en emergencia (misma regla de calcularPuntosServicios)
+    Entradas: lista (puntero al inicio de la lista de servicios de la comuna, para contar los tipos),
+              servicio (puntero al servicio a evaluar),
+              personas (cantidad de personas en la comuna),
+              cantidadARestar (cantidad del servicio que se desea dar)
+    Salidas: 1 si el servicio puede ser dado sin riesgo, 0 si no
+    */
+    struct Servicios *actual = lista; // Puntero para recorrer la lista y contar los tipos de servicios
+    int num_tipos = 0; // Cantidad de tipos de servicios de la comuna
+    int cantidad_restante = 0; // Cantidad que quedaría después de dar el servicio
+    float reparto_esperado = 0; // Cantidad esperada de cada servicio por tipo
+    float ratio = 0; // Proporción de lo que quedaría respecto al reparto esperado
+
+    // Si el servicio ya está en emergencia, no puede dar
+    if (servicio->emergencias == 1) {
+        return 0;
+    }
+
+    // Contar el número de tipos de servicios de la comuna
+    while (actual != NULL) {
+        num_tipos = num_tipos + 1;
+        actual = actual->siguiente;
+    }
+
+    cantidad_restante = servicio->cantidad - cantidadARestar;
+    reparto_esperado = (float)personas / num_tipos;
+    ratio = cantidad_restante / reparto_esperado;
+
+    // Si después de dar quedaría en emergencia (menos del 20% del reparto esperado), no puede dar
+    if (ratio < 0.2) {
+        return 0;
+    }
+
+    return 1;
+}

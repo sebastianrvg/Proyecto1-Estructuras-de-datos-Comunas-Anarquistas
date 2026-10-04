@@ -9,5 +9,8 @@ void alcanceEmergencia(struct Comuna *comuna, int perdida, char *nombre_emergenc
 struct Recursos *buscarRecurso(struct Recursos *lista, char *nombre);
 struct Recursos *encontrarRecursoMasBajo(struct Recursos *lista, char *nombre_excluir);
 int puedeDarRecurso(struct Recursos *recurso, int personas, int cantidadARestar);
+struct Servicios *buscarServicio(struct Servicios *lista, char *nombre);
+struct Servicios *encontrarServicioMasBajo(struct Servicios *lista, char *nombre_excluir);
+int puedeDarServicio(struct Servicios *lista, struct Servicios *servicio, int personas, int cantidadARestar);
 
 #endif

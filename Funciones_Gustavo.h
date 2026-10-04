@@ -13,5 +13,7 @@ void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmer
 void generarEmergencia(struct Comuna *actual, int cantidadComunas);
 void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia);
 void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, char *nombre_buscado, int cantidad_buscada);
+void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, char *nombre_buscado, int cantidad_buscada);
+void trueque(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, int tipo, char *nombre_buscado, int cantidad_buscada);
 
 #endif
