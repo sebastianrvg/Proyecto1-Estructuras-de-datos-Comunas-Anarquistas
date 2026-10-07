@@ -367,6 +367,8 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
 
     int cantidad_final = 0; // Cantidad que tendria una comuna despues de recibir, para compararla con su maximo
 
+    int respuesta = 0; // Respuesta del usuario: 1 = continuar, 2 = no continuar, 0 = opcion no valida
+
     // Buscar el recurso solicitado en la comuna proveedora
     B_recurso_proveedora = buscarRecurso(comunaProveedora->bienes, nombre_buscado);
     if (B_recurso_proveedora == NULL) {
@@ -448,6 +450,20 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
         B_bono_proveedora = B_bono_proveedora + 1;
     }
 
+    // Mostrar el intercambio al usuario y pedirle confirmacion antes de hacerlo
+    printf("Propuesta de trueque de bienes:\n");
+    printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
+    printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_pedida, B_recurso_pedido->nombre, comunaSolicitante->nombre);
+    pedirConfirmacion(&respuesta);
+    if (respuesta == 2) {
+        printf("No se acepto el trueque.\n");
+        return;
+    }
+    if (respuesta != 1) {
+        printf("Esa no es una opcion valida. Trueque cancelado.\n");
+        return;
+    }
+
     // Actualizar las cantidades de los recursos en ambas comunas después del trueque
     B_recurso_proveedora->cantidad = B_recurso_proveedora->cantidad - cantidad_buscada;
 
@@ -469,8 +485,6 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
     printf("Trueque exitoso: %s le dio %d de %s a %s, y recibio %d de %s.\n", comunaProveedora->nombre, cantidad_buscada, nombre_buscado, comunaSolicitante->nombre, cantidad_pedida, B_recurso_pedido->nombre);
 }
 
-/*Todavia no sirve completo. Falta diferenciar los oficios de las personas (agregar un entero "oficio" en Persona)
-Por ahora solo mueve las cantidades de los servicios, no las personas.*/
 void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, char *nombre_buscado, int cantidad_buscada) {
     /*
     Funcionamiento: Permite a una comuna solicitar un servicio a otra comuna a cambio de otro servicio, siempre 1 a 1
@@ -492,9 +506,15 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
 
     int A_personas_solicitante = 0; // Cantidad de personas en la comuna solicitante
 
+    int B_personas_con_oficio = 0; // Cantidad de personas de la comuna proveedora que tienen el oficio que se va a dar
+
+    int A_personas_con_oficio = 0; // Cantidad de personas de la comuna solicitante que tienen el oficio que se va a dar a cambio
+
     int puede_dar = 0; // Variable para verificar si una comuna puede dar el servicio sin quedar en emergencia
 
     int cantidad_final = 0; // Cantidad que tendría una comuna después de recibir, para compararla con su máximo
+
+    int respuesta = 0; // Respuesta del usuario: 1 = continuar, 2 = no continuar, 0 = opcion no valida
 
     // Buscar el servicio solicitado en la comuna proveedora
     B_servicio_proveedora = buscarServicio(comunaProveedora->servicios, nombre_buscado);
@@ -554,11 +574,43 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
         return;
     }
 
+    // Verificar que la comuna proveedora tenga las personas con ese oficio para poder trasladarlas
+    B_personas_con_oficio = contarPersonasPorOficio(comunaProveedora->personas, B_servicio_proveedora->oficio);
+    if (B_personas_con_oficio < cantidad_buscada) {
+        printf("No se pudo hacer el trueque: %s no tiene %d personas con el oficio de %s para trasladar.\n", comunaProveedora->nombre, cantidad_buscada, nombre_buscado);
+        return;
+    }
+
+    // Verificar que la comuna solicitante tenga las personas con ese oficio para poder trasladarlas a cambio
+    A_personas_con_oficio = contarPersonasPorOficio(comunaSolicitante->personas, A_servicio_solicitante->oficio);
+    if (A_personas_con_oficio < cantidad_buscada) {
+        printf("No se pudo hacer el trueque: %s no tiene %d personas con el oficio de %s para trasladar.\n", comunaSolicitante->nombre, cantidad_buscada, B_servicio_pedido->nombre);
+        return;
+    }
+
+    // Mostrar el intercambio al usuario y pedirle confirmacion antes de hacerlo
+    printf("Propuesta de trueque de servicios:\n");
+    printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
+    printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_buscada, B_servicio_pedido->nombre, comunaSolicitante->nombre);
+    pedirConfirmacion(&respuesta);
+    if (respuesta == 2) {
+        printf("No se acepto el trueque.\n");
+        return;
+    }
+    if (respuesta != 1) {
+        printf("Esa no es una opcion valida. Trueque cancelado.\n");
+        return;
+    }
+
     // Actualizar las cantidades de los servicios en ambas comunas después del trueque (1 a 1)
     B_servicio_proveedora->cantidad = B_servicio_proveedora->cantidad - cantidad_buscada;
     A_servicio_solicitante_recibe->cantidad = A_servicio_solicitante_recibe->cantidad + cantidad_buscada;
     A_servicio_solicitante->cantidad = A_servicio_solicitante->cantidad - cantidad_buscada;
     B_servicio_pedido->cantidad = B_servicio_pedido->cantidad + cantidad_buscada;
+
+    // Trasladar a las personas: las del oficio pedido pasan a la comuna solicitante y las del oficio a cambio pasan a la comuna proveedora
+    trasladarPersonas(comunaProveedora, comunaSolicitante, B_servicio_proveedora->oficio, cantidad_buscada);
+    trasladarPersonas(comunaSolicitante, comunaProveedora, A_servicio_solicitante->oficio, cantidad_buscada);
 
     printf("Trueque exitoso: %s le dio %d de %s a %s, y recibio %d de %s.\n", comunaProveedora->nombre, cantidad_buscada, nombre_buscado, comunaSolicitante->nombre, cantidad_buscada, B_servicio_pedido->nombre);
 }

@@ -368,3 +368,101 @@ int puedeDarServicio(struct Servicios *lista, struct Servicios *servicio, int pe
 
     return 1;
 }
+
+int contarPersonasPorOficio(struct Persona *lista, int oficio) {
+    /*
+    Funcionamiento: Cuenta cuantas personas de una lista tienen un oficio determinado
+    Entradas: lista (puntero al inicio de la lista de personas),
+              oficio (numero del oficio que se quiere contar)
+    Salidas: cantidad de personas con ese oficio
+    */
+    struct Persona *actual = lista; // Puntero para recorrer la lista de personas
+    int cantidad = 0; // Cantidad de personas con ese oficio
+
+    // Recorrer la lista contando las personas que tienen el oficio buscado
+    while (actual != NULL) {
+        if (actual->oficio == oficio) {
+            cantidad = cantidad + 1;
+        }
+        actual = actual->siguiente;
+    }
+
+    return cantidad;
+}
+
+void sacarPersonaPorOficio(struct Persona **lista, int oficio, struct Persona **sacada) {
+    /*
+    Funcionamiento: Saca de la lista a la primera persona que tenga el oficio indicado, sin liberar su memoria
+    Entradas: lista (puntero al puntero del inicio de la lista de personas),
+              oficio (numero del oficio de la persona que se quiere sacar),
+              sacada (puntero donde se guardara la persona sacada)
+    Salidas: sacada apunta a la persona sacada (con siguiente en NULL), o a NULL si no habia ninguna con ese oficio
+    */
+    struct Persona *actual = *lista; // Puntero para recorrer la lista de personas
+    struct Persona *anterior = NULL; // Puntero a la persona anterior a la que se esta revisando
+
+    *sacada = NULL;
+
+    // Recorrer la lista hasta encontrar la primera persona con el oficio buscado
+    while (actual != NULL) {
+        if (actual->oficio == oficio) {
+            // Si es la primera de la lista, el inicio pasa a ser la siguiente
+            if (anterior == NULL) {
+                *lista = actual->siguiente;
+            } else {
+                anterior->siguiente = actual->siguiente;
+            }
+            actual->siguiente = NULL;
+            *sacada = actual;
+            return;
+        }
+        anterior = actual;
+        actual = actual->siguiente;
+    }
+}
+
+void trasladarPersonas(struct Comuna *comunaOrigen, struct Comuna *comunaDestino, int oficio, int cantidad) {
+    /*
+    Funcionamiento: Traslada personas con un oficio determinado de una comuna a otra, por lo que dejan de aparecer en la de origen y pasan a aparecer en la de destino
+    Entradas: comunaOrigen (puntero a la comuna de la que salen las personas),
+              comunaDestino (puntero a la comuna a la que llegan las personas),
+              oficio (numero del oficio de las personas que se trasladan),
+              cantidad (cantidad de personas que se trasladan)
+    Salidas: ninguna (actualiza directamente las listas de personas de ambas comunas)
+    */
+    struct Persona *persona_sacada = NULL; // Persona que se saca de la comuna de origen para pasarla a la de destino
+
+    for (int i = 0; i < cantidad; i++) {
+        sacarPersonaPorOficio(&comunaOrigen->personas, oficio, &persona_sacada);
+        if (persona_sacada != NULL) {
+            comunaDestino->personas = insertarPersona(comunaDestino->personas, persona_sacada);
+        }
+    }
+}
+
+void pedirConfirmacion(int *respuesta) {
+    /*
+    Funcionamiento: Le pregunta al usuario si quiere continuar con el intercambio y lee su respuesta (1 = si, 2 = no)
+    Entradas: respuesta (puntero donde se guardara la opcion elegida)
+    Salidas: respuesta queda en 1 si acepta, en 2 si no acepta, o en 0 si escribio otra cosa o ya no hay mas datos que leer
+    */
+    char texto[20]; // Texto que escribe el usuario
+    char *leido = NULL; // Resultado de leer el texto (NULL si ya no hay mas datos)
+    int opcion = 0; // Numero que escribio el usuario
+    int convertidos = 0; // Cantidad de numeros que se pudieron leer del texto
+
+    *respuesta = 0;
+
+    printf("Desea continuar con el intercambio? (1 = si, 2 = no): ");
+    leido = fgets(texto, sizeof(texto), stdin);
+    if (leido == NULL) {
+        printf("\n");
+        return;
+    }
+    convertidos = sscanf(texto, "%d", &opcion);
+    if (convertidos == 1) {
+        if (opcion == 1 || opcion == 2) {
+            *respuesta = opcion;
+        }
+    }
+}
