@@ -1,6 +1,28 @@
 #ifndef NODOS_H
 #define NODOS_H
 
+/*
+Consumo de bienes por persona en cada turno. Todas las funciones que aplican
+o estiman consumo usan estas mismas constantes, para que el modelo sea el mismo
+en toda la simulacion. El promedio es el punto medio entre el minimo y el maximo.
+*/
+#define CONSUMO_MINIMO_POR_PERSONA 1
+#define CONSUMO_MAXIMO_POR_PERSONA 5
+#define CONSUMO_PROMEDIO_POR_PERSONA 3
+
+/*
+Cada punto de gravedad de una emergencia quita este porcentaje de la cantidad
+maxima del recurso o servicio afectado (con un minimo de 1 unidad).
+*/
+#define PORCENTAJE_PERDIDA_POR_PUNTO 5
+
+/*
+Porcentaje de la cantidad intercambiada que cada comuna recibe de mas en un
+trueque (bono de reciprocidad). Es lo que hace subir el valor de los bienes
+y servicios cuando las comunas cooperan.
+*/
+#define PORCENTAJE_BONO_TRUEQUE 30
+
 struct Recursos {
     /*
     Funcionamiento: Sirve para representar los recursos disponibles en la comuna, como alimentos, medicinas, herramientas, etc. 
@@ -10,7 +32,7 @@ struct Recursos {
     char nombre[50]; // Nombre del recurso
     int cantidad; // Cantidad actual del recurso
     int cantidadMaxima; // Cantidad máxima que puede ser almacenada
-    int emergencias; // Cantidad de emergencias que han ocurrido con este recurso
+    int emergencias; // 1 si el recurso esta en emergencia (no alcanza para 2 turnos de consumo), 0 si no
     struct Recursos *siguiente; 
 };
 
@@ -23,7 +45,7 @@ struct Servicios {
     char nombre[50]; // Nombre del servicio
     int cantidad; // Cantidad actual del servicio
     int cantidadMaxima; // Cantidad máxima que puede ser ofrecida
-    int emergencias; // Cantidad de emergencias que han ocurrido con este servicio
+    int emergencias; // 1 si el servicio esta en emergencia (menos del 20% del reparto esperado), 0 si no
     int oficio; // Numero que identifica el servicio, es el mismo que usa Persona (posicion en el archivo, empieza en 1)
     struct Servicios *siguiente;
 };
@@ -214,4 +236,4 @@ Salidas: ninguna (libera memoria)
 */
 void liberarServicios(struct Servicios *lista);
 
-#endif
+#endif

@@ -202,7 +202,7 @@ void aplicarConsumo(struct Comuna *comuna) {
     while (actual != NULL) {
         consumo = 0;
         for (int i = 0; i < personas; i++) {
-            consumo = consumo + (rand() % 5) + 1;
+            consumo = consumo + (rand() % (CONSUMO_MAXIMO_POR_PERSONA - CONSUMO_MINIMO_POR_PERSONA + 1)) + CONSUMO_MINIMO_POR_PERSONA;
         }
 
         actual->cantidad = actual->cantidad - consumo;
@@ -359,8 +359,6 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
 
     int probabilidad_extra = 0; // Variable para determinar si hay un aumento aleatorio en la cantidad pedida
 
-    float bono_flotante = 0; // Variable para calcular el bono flotante que se dará a la comuna solicitante y proveedora
-
     int A_bono_solicitante = 0; // Variable para almacenar el bono que recibirá la comuna solicitante
 
     int B_bono_proveedora = 0; // Variable para almacenar el bono que recibirá la comuna proveedora
@@ -368,6 +366,11 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
     int cantidad_final = 0; // Cantidad que tendria una comuna despues de recibir, para compararla con su maximo
 
     int respuesta = 0; // Respuesta del usuario: 1 = continuar, 2 = no continuar, 0 = opcion no valida
+
+    // Validar que el trueque tenga sentido (comunas distintas y cantidad mayor que 0)
+    if (validarTrueque(comunaSolicitante, comunaProveedora, cantidad_buscada) == 0) {
+        return;
+    }
 
     // Buscar el recurso solicitado en la comuna proveedora
     B_recurso_proveedora = buscarRecurso(comunaProveedora->bienes, nombre_buscado);
@@ -436,24 +439,15 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
         return;
     }
 
-    // Calcular el bono para la comuna solicitante según la cantidad de recursos intercambiados
-    bono_flotante = 0.3 * cantidad_buscada;
-    A_bono_solicitante = (int) bono_flotante;
-    if (bono_flotante > A_bono_solicitante) {
-        A_bono_solicitante = A_bono_solicitante + 1;
-    }
-
-    // Calcular el bono para la comuna proveedora según la cantidad de recursos intercambiados
-    bono_flotante = 0.3 * cantidad_pedida;
-    B_bono_proveedora = (int) bono_flotante;
-    if (bono_flotante > B_bono_proveedora) {
-        B_bono_proveedora = B_bono_proveedora + 1;
-    }
+    // Calcular el bono de reciprocidad para cada comuna según la cantidad que recibe
+    A_bono_solicitante = calcularBono(cantidad_buscada);
+    B_bono_proveedora = calcularBono(cantidad_pedida);
 
     // Mostrar el intercambio al usuario y pedirle confirmacion antes de hacerlo
     printf("Propuesta de trueque de bienes:\n");
     printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
     printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_pedida, B_recurso_pedido->nombre, comunaSolicitante->nombre);
+    printf("  Bono de reciprocidad: %s +%d y %s +%d.\n", comunaSolicitante->nombre, A_bono_solicitante, comunaProveedora->nombre, B_bono_proveedora);
     pedirConfirmacion(&respuesta);
     if (respuesta == 2) {
         printf("No se acepto el trueque.\n");
@@ -515,6 +509,13 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
     int cantidad_final = 0; // Cantidad que tendría una comuna después de recibir, para compararla con su máximo
 
     int respuesta = 0; // Respuesta del usuario: 1 = continuar, 2 = no continuar, 0 = opcion no valida
+
+    int bono = 0; // Bono de reciprocidad que recibe cada comuna (las dos reciben la misma cantidad porque el trueque es 1 a 1)
+
+    // Validar que el trueque tenga sentido (comunas distintas y cantidad mayor que 0)
+    if (validarTrueque(comunaSolicitante, comunaProveedora, cantidad_buscada) == 0) {
+        return;
+    }
 
     // Buscar el servicio solicitado en la comuna proveedora
     B_servicio_proveedora = buscarServicio(comunaProveedora->servicios, nombre_buscado);
@@ -588,10 +589,14 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
         return;
     }
 
+    // Calcular el bono de reciprocidad (el mismo para ambas comunas)
+    bono = calcularBono(cantidad_buscada);
+
     // Mostrar el intercambio al usuario y pedirle confirmacion antes de hacerlo
     printf("Propuesta de trueque de servicios:\n");
     printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
     printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_buscada, B_servicio_pedido->nombre, comunaSolicitante->nombre);
+    printf("  Bono de reciprocidad: cada comuna recibe +%d.\n", bono);
     pedirConfirmacion(&respuesta);
     if (respuesta == 2) {
         printf("No se acepto el trueque.\n");
@@ -604,9 +609,18 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
 
     // Actualizar las cantidades de los servicios en ambas comunas después del trueque (1 a 1)
     B_servicio_proveedora->cantidad = B_servicio_proveedora->cantidad - cantidad_buscada;
-    A_servicio_solicitante_recibe->cantidad = A_servicio_solicitante_recibe->cantidad + cantidad_buscada;
     A_servicio_solicitante->cantidad = A_servicio_solicitante->cantidad - cantidad_buscada;
-    B_servicio_pedido->cantidad = B_servicio_pedido->cantidad + cantidad_buscada;
+
+    // Cada comuna recibe lo que pidio mas el bono de reciprocidad, sin pasar de su cantidad maxima
+    A_servicio_solicitante_recibe->cantidad = A_servicio_solicitante_recibe->cantidad + cantidad_buscada + bono;
+    if (A_servicio_solicitante_recibe->cantidad > A_servicio_solicitante_recibe->cantidadMaxima) {
+        A_servicio_solicitante_recibe->cantidad = A_servicio_solicitante_recibe->cantidadMaxima;
+    }
+
+    B_servicio_pedido->cantidad = B_servicio_pedido->cantidad + cantidad_buscada + bono;
+    if (B_servicio_pedido->cantidad > B_servicio_pedido->cantidadMaxima) {
+        B_servicio_pedido->cantidad = B_servicio_pedido->cantidadMaxima;
+    }
 
     // Trasladar a las personas: las del oficio pedido pasan a la comuna solicitante y las del oficio a cambio pasan a la comuna proveedora
     trasladarPersonas(comunaProveedora, comunaSolicitante, B_servicio_proveedora->oficio, cantidad_buscada);

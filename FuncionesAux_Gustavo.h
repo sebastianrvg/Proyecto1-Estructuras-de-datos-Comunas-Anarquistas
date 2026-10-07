@@ -16,5 +16,7 @@ int contarPersonasPorOficio(struct Persona *lista, int oficio);
 void sacarPersonaPorOficio(struct Persona **lista, int oficio, struct Persona **sacada);
 void trasladarPersonas(struct Comuna *comunaOrigen, struct Comuna *comunaDestino, int oficio, int cantidad);
 void pedirConfirmacion(int *respuesta);
+int validarTrueque(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, int cantidad);
+int calcularBono(int cantidad);
 
 #endif

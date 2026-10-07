@@ -23,11 +23,9 @@ void calcularPuntosRecursos(struct Recursos *lista, int personas, int *suma_punt
 
     // Contar la estimación de recursos necesarios para 2 turnos
     while (actual != NULL) {
-        estimado_1_turno = 0;
-        // Estimar la cantidad de recursos necesarios para 1 turno y luego multiplicar por 2
-        for (int i = 0; i < personas; i++) {
-            estimado_1_turno += (rand() % 4) + 1; // Simulación de consumo de recursos por persona (1 a 4 unidades)
-        }
+        // Estimar la cantidad de recursos necesarios para 1 turno con el consumo promedio por persona
+        // (sin azar, para que la misma situacion de siempre el mismo resultado) y luego multiplicar por 2
+        estimado_1_turno = personas * CONSUMO_PROMEDIO_POR_PERSONA;
         estimado_2_turnos = estimado_1_turno * 2;
 
         // Calcular los puntos de satisfacción y emergencias según la cantidad disponible
@@ -129,13 +127,14 @@ void alcanceEmergencia(struct Comuna *comuna, int perdida, char *nombre_emergenc
     /*
     Funcionamiento: Aplica el efecto de una emergencia a un recurso o servicio aleatorio de la comuna
     Entradas: comuna (puntero a la comuna afectada), 
-    perdida (cantidad de unidades perdidas), 
+    perdida (gravedad de la emergencia; cada punto quita un porcentaje de la cantidad maxima del bien o servicio afectado), 
             nombre_emergencia (nombre de la emergencia)
     Salidas: ninguna (actualiza directamente los bienes o servicios de la comuna)
     */
     int bien_seleccionado = 0;
     int cantidadNodos = 0;
     int indice = 0;
+    int perdida_real = 0; // Unidades que realmente se pierden segun la cantidad maxima del bien o servicio afectado
 
     // Seleccionar aleatoriamente si la emergencia afectará un recurso o un servicio
     bien_seleccionado = rand() % 2;
@@ -159,13 +158,19 @@ void alcanceEmergencia(struct Comuna *comuna, int perdida, char *nombre_emergenc
             actual = actual->siguiente;
         }
 
-        if (actual->emergencias == 1) {
-            printf("Ha ocurrido %s en %s. El bien %s ya estaba en emergencia y perdio %d unidades mas.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
-        } else {
-            printf("Ha ocurrido %s en %s. Se vio afectado el bien %s, se perdieron %d unidades.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+        // Calcular las unidades perdidas como porcentaje de la cantidad maxima (minimo 1 unidad)
+        perdida_real = (actual->cantidadMaxima * perdida * PORCENTAJE_PERDIDA_POR_PUNTO) / 100;
+        if (perdida_real < 1) {
+            perdida_real = 1;
         }
 
-        actual->cantidad = actual->cantidad - perdida;
+        if (actual->emergencias == 1) {
+            printf("Ha ocurrido %s en %s. El bien %s ya estaba en emergencia y perdio %d unidades mas.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida_real);
+        } else {
+            printf("Ha ocurrido %s en %s. Se vio afectado el bien %s, se perdieron %d unidades.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida_real);
+        }
+
+        actual->cantidad = actual->cantidad - perdida_real;
         if (actual->cantidad < 0) {
             actual->cantidad = 0;
         }
@@ -193,17 +198,23 @@ void alcanceEmergencia(struct Comuna *comuna, int perdida, char *nombre_emergenc
             actual = actual->siguiente;
         }
 
+        // Calcular las unidades perdidas como porcentaje de la cantidad maxima (minimo 1 unidad)
+        perdida_real = (actual->cantidadMaxima * perdida * PORCENTAJE_PERDIDA_POR_PUNTO) / 100;
+        if (perdida_real < 1) {
+            perdida_real = 1;
+        }
+
         // Si el servicio ya estaba en emergencia, informar que perdió más unidades
         if (actual->emergencias == 1) {
-            printf("Ha ocurrido %s en %s. El servicio %s ya estaba en emergencia y perdio %d unidades mas.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+            printf("Ha ocurrido %s en %s. El servicio %s ya estaba en emergencia y perdio %d unidades mas.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida_real);
         
         // Si el servicio no estaba en emergencia, informar que se vio afectado y perdió unidades
         } else {
-            printf("Ha ocurrido %s en %s. Se vio afectado el servicio %s, se perdieron %d unidades.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida);
+            printf("Ha ocurrido %s en %s. Se vio afectado el servicio %s, se perdieron %d unidades.\n", nombre_emergencia, comuna->nombre, actual->nombre, perdida_real);
         }
 
         // Actualizar la cantidad del servicio afectado por la emergencia
-        actual->cantidad = actual->cantidad - perdida; // Reducir la cantidad del servicio afectado por la emergencia
+        actual->cantidad = actual->cantidad - perdida_real; // Reducir la cantidad del servicio afectado por la emergencia
 
         // Asegurarse de que la cantidad del servicio no sea negativa
         if (actual->cantidad < 0) {
@@ -274,7 +285,7 @@ int puedeDarRecurso(struct Recursos *recurso, int personas, int cantidadARestar)
         return 0;
     }
 
-    estimado_1_turno = personas * ((rand() % 3) + 1);
+    estimado_1_turno = personas * CONSUMO_PROMEDIO_POR_PERSONA;
     cantidad_restante = recurso->cantidad - cantidadARestar;
 
     if (cantidad_restante < estimado_1_turno) {
@@ -465,4 +476,43 @@ void pedirConfirmacion(int *respuesta) {
             *respuesta = opcion;
         }
     }
+}
+
+int validarTrueque(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, int cantidad) {
+    /*
+    Funcionamiento: Revisa que un trueque tenga sentido antes de hacerlo: que las dos comunas existan, que sean distintas y que la cantidad sea mayor que 0
+    Entradas: comunaSolicitante (puntero a la comuna que solicita),
+              comunaProveedora (puntero a la comuna que provee),
+              cantidad (cantidad que se quiere intercambiar)
+    Salidas: 1 si el trueque es valido, 0 si no (e imprime el motivo)
+    */
+    if (comunaSolicitante == NULL || comunaProveedora == NULL) {
+        printf("No se pudo hacer el trueque: falta una de las comunas.\n");
+        return 0;
+    }
+
+    if (comunaSolicitante == comunaProveedora) {
+        printf("No se pudo hacer el trueque: una comuna no puede hacer trueque consigo misma.\n");
+        return 0;
+    }
+
+    if (cantidad <= 0) {
+        printf("No se pudo hacer el trueque: la cantidad debe ser mayor que 0.\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+int calcularBono(int cantidad) {
+    /*
+    Funcionamiento: Calcula el bono de reciprocidad de un trueque, que es un porcentaje de la cantidad intercambiada redondeado hacia arriba. Representa el valor comunitario extra que se genera cuando dos comunas cooperan
+    Entradas: cantidad (cantidad que recibe la comuna en el trueque)
+    Salidas: bono (unidades extra que recibe la comuna)
+    */
+    int bono = 0;
+
+    bono = (cantidad * PORCENTAJE_BONO_TRUEQUE + 99) / 100;
+
+    return bono;
 }
