@@ -355,14 +355,15 @@ void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turno
 
 void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia) {
     /*
-    Funcionamiento: aplica el consumo de bienes a todas las comunas, luego actualiza sus indices de necesidad y satisfaccion y finalmente controla si ocurre una emergencia en alguna comuna.
+    Funcionamiento: aplica el consumo de bienes a todas las comunas, actualiza sus indices de necesidad y satisfaccion, controla si ocurre una emergencia en alguna comuna y vuelve a actualizar los indices para que reflejen la emergencia y el posible regalo.
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
               cantidadComunas (numero total de comunas en la lista)
     Salidas: ninguna
     */
     aplicarConsumoTodas(inicio);
-    actualizarIndices(inicio, cantidadComunas);
+    actualizarIndices(inicio, cantidadComunas); // Primero los indices del consumo, para que la emergencia y el regalo trabajen con los estados al dia
     controlarEmergencias(inicio, cantidadComunas, turnosHastaEmergencia);
+    actualizarIndices(inicio, cantidadComunas); // Otra vez, para que los indices muestren lo que dejo la emergencia y el posible regalo
 }
 
 void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, char *nombre_buscado, int cantidad_buscada) {
@@ -681,72 +682,6 @@ void trueque(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, 
     } else {
         printf("Opcion no valida.\n");
     }
-}
-
-int hayRegalo(void) {
-    /*
-    Funcionamiento: Decide al azar si una emergencia va a recibir un regalo de otra comuna, con la probabilidad PROBABILIDAD_REGALO (en porcentaje)
-    Entradas: ninguna
-    Salidas: 1 si hay regalo, 0 si no
-    */
-    int tirada = 0; // Numero al azar entre 0 y 99
-
-    tirada = rand() % 100;
-    if (tirada < PROBABILIDAD_REGALO) {
-        return 1;
-    }
-
-    return 0;
-}
-
-int regalarRecursos(struct Comuna *comunaAfectada, int regalo) {
-    /*
-    Funcionamiento: Recorre las demas comunas una por una, empezando por la siguiente a la afectada, y la primera que pueda regalar sin quedar en emergencia le pasa la cantidad indicada a la comuna afectada, sin pedir nada a cambio. El recurso regalado es el que tiene menos cantidad en la comuna afectada. Solo se regalan recursos, nunca servicios
-    Entradas: comunaAfectada (puntero a la comuna que recibe el regalo),
-              regalo (cantidad que se regala)
-    Salidas: 1 si se hizo el regalo (e imprime un mensaje), 0 si no se pudo (no imprime nada)
-    */
-    struct Recursos *receptor_recurso = NULL; // Recurso de la comuna afectada que recibe el regalo (el que tiene menos cantidad)
-    struct Recursos *donante_recurso = NULL; // Mismo recurso, pero en la comuna que regala
-    struct Comuna *donante = NULL; // Comuna que se esta revisando para ver si puede regalar
-    int personas_donante = 0; // Cantidad de personas de la comuna que se esta revisando
-    int puede_dar = 0; // Indica si la comuna que se esta revisando puede regalar sin quedar en riesgo
-    int cantidad_final = 0; // Cantidad que tendria la comuna afectada despues de recibir, para compararla con su maximo
-
-    if (comunaAfectada == NULL || regalo <= 0) {
-        return 0;
-    }
-
-    // Buscar el recurso con menos cantidad en la comuna afectada (el nombre vacio no excluye ninguno)
-    receptor_recurso = encontrarRecursoMasBajo(comunaAfectada->bienes, "");
-    if (receptor_recurso == NULL) {
-        return 0;
-    }
-
-    // Verificar que la comuna afectada no pase de su cantidad maxima al recibir el regalo
-    cantidad_final = receptor_recurso->cantidad + regalo;
-    if (cantidad_final > receptor_recurso->cantidadMaxima) {
-        return 0;
-    }
-
-    // Recorrer las demas comunas hasta encontrar una que pueda regalar
-    donante = comunaAfectada->siguiente;
-    while (donante != comunaAfectada) {
-        donante_recurso = buscarRecurso(donante->bienes, receptor_recurso->nombre);
-        if (donante_recurso != NULL) {
-            personas_donante = recorrerPersonas(donante->personas);
-            puede_dar = puedeDarRecurso(donante_recurso, personas_donante, regalo);
-            if (puede_dar == 1) {
-                donante_recurso->cantidad = donante_recurso->cantidad - regalo;
-                receptor_recurso->cantidad = receptor_recurso->cantidad + regalo;
-                printf("%s le regalo %d de %s a %s, sin pedir nada a cambio.\n", donante->nombre, regalo, receptor_recurso->nombre, comunaAfectada->nombre);
-                return 1;
-            }
-        }
-        donante = donante->siguiente;
-    }
-
-    return 0;
 }
 
 void mostrarEmergencias(struct Comuna *inicio) {
