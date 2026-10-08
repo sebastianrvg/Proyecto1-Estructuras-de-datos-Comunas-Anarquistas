@@ -362,6 +362,11 @@ int puedeDarServicio(struct Servicios *lista, struct Servicios *servicio, int pe
         return 0;
     }
 
+    // Una comuna sin personas no puede dar servicios (y asi se evita dividir entre 0 mas abajo)
+    if (personas == 0) {
+        return 0;
+    }
+
     // Contar el número de tipos de servicios de la comuna
     while (actual != NULL) {
         num_tipos = num_tipos + 1;

@@ -347,7 +347,10 @@ struct Persona *leerPersonas(char nombreArchivo[], int cantidadOficios) {
             linea[longitud - 1] = '\0';
         }
         nueva = crearPersona(linea);
-        nueva->oficio = (rand() % cantidadOficios) + 1;
+        // Solo se asigna oficio si hay oficios disponibles (evita dividir entre 0)
+        if (cantidadOficios > 0) {
+            nueva->oficio = (rand() % cantidadOficios) + 1;
+        }
         lista = insertarPersona(lista, nueva);
     }
 

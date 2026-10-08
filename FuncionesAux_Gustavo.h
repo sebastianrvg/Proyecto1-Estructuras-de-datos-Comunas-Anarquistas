@@ -18,5 +18,7 @@ void trasladarPersonas(struct Comuna *comunaOrigen, struct Comuna *comunaDestino
 void pedirConfirmacion(int *respuesta);
 int validarTrueque(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, int cantidad);
 int calcularBono(int cantidad);
+int hayRegalo(void);
+int regalarRecursos(struct Comuna *comunaAfectada, int regalo);
 
 #endif

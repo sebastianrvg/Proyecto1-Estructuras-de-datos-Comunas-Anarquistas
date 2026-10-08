@@ -23,6 +23,15 @@ y servicios cuando las comunas cooperan.
 */
 #define PORCENTAJE_BONO_TRUEQUE 30
 
+
+/*
+Regalo despues de una emergencia: probabilidad (en porcentaje) de que otra comuna
+le regale recursos a la comuna afectada, y rango de la cantidad que se regala.
+*/
+#define PROBABILIDAD_REGALO 25
+#define REGALO_MINIMO 5
+#define REGALO_MAXIMO 10
+
 struct Recursos {
     /*
     Funcionamiento: Sirve para representar los recursos disponibles en la comuna, como alimentos, medicinas, herramientas, etc. 
@@ -236,4 +245,4 @@ Salidas: ninguna (libera memoria)
 */
 void liberarServicios(struct Servicios *lista);
 
-#endif
+#endif

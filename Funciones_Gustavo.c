@@ -26,6 +26,11 @@ float formulaSatisfaccion(struct Comuna *comuna) {
 
     personas = recorrerPersonas(comuna->personas);
 
+    // Una comuna sin personas no tiene quien pueda estar satisfecho (y asi se evitan divisiones entre 0 mas adelante)
+    if (personas == 0) {
+        return 0;
+    }
+
     // Contar el total de recursos
     while (r != NULL) {
         total_recursos = total_recursos + 1;
@@ -150,9 +155,13 @@ float calcularNecesidad(struct Comuna *comuna) {
         s = s->siguiente;
     }
 
-    // Calcular el faltante de recursos y servicios como proporción de la cantidad máxima
-    faltante_recursos = (float)(suma_maximo_recursos - suma_cantidad_recursos) / suma_maximo_recursos;
-    faltante_servicios = (float)(suma_maximo_servicios - suma_cantidad_servicios) / suma_maximo_servicios;
+    // Si la suma de maximos es 0 (no hay recursos o servicios, o todavia no se asignaron maximos), el faltante queda en 0 para no dividir entre 0
+    if (suma_maximo_recursos > 0) {
+        faltante_recursos = (float)(suma_maximo_recursos - suma_cantidad_recursos) / suma_maximo_recursos;
+    }
+    if (suma_maximo_servicios > 0) {
+        faltante_servicios = (float)(suma_maximo_servicios - suma_cantidad_servicios) / suma_maximo_servicios;
+    }
 
     // Calcular el promedio de los faltantes de recursos y servicios
     promedio_faltantes = (faltante_recursos + faltante_servicios) / 2;
@@ -245,6 +254,8 @@ void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
     int perdida = 0;
     char *nombre_emergencia = "";
     int grave = 0;
+    int hay_regalo = 0; // 1 si otra comuna va a intentar regalar recursos a la comuna afectada
+    int regalo = 0; // Cantidad que se va a regalar
     struct Comuna *siguiente = NULL;
     struct Comuna *anterior = NULL;
 
@@ -275,6 +286,18 @@ void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
     // Aplicar la emergencia a la comuna actual
     alcanceEmergencia(actual, perdida, nombre_emergencia);
 
+    // Anunciar cual emergencia ocurrio y a cuales comunas afecta (las graves tambien afectan a las vecinas)
+    if (grave == 1 && cantidadComunas >= 3) {
+        siguiente = avanzarComunas(actual, 1, cantidadComunas);
+        anterior = avanzarComunas(actual, cantidadComunas - 1, cantidadComunas);
+        printf("EMERGENCIA: %s afecta a %s, %s y %s.\n", nombre_emergencia, actual->nombre, siguiente->nombre, anterior->nombre);
+    } else if (grave == 1 && cantidadComunas == 2) {
+        siguiente = avanzarComunas(actual, 1, cantidadComunas);
+        printf("EMERGENCIA: %s afecta a %s y %s.\n", nombre_emergencia, actual->nombre, siguiente->nombre);
+    } else {
+        printf("EMERGENCIA: %s afecta a %s.\n", nombre_emergencia, actual->nombre);
+    }
+
     // Si la emergencia es grave, también se aplica a las comunas vecinas
     if (grave == 1 && cantidadComunas >= 2) {
         siguiente = avanzarComunas(actual, 1, cantidadComunas);
@@ -285,6 +308,13 @@ void generarEmergencia(struct Comuna *actual, int cantidadComunas) {
             anterior = avanzarComunas(actual, cantidadComunas - 1, cantidadComunas);
             alcanceEmergencia(anterior, perdida, nombre_emergencia);
         }
+    }
+
+    // Con cierta probabilidad otra comuna le regala recursos a la comuna afectada (si ninguna puede, no se avisa nada)
+    hay_regalo = hayRegalo();
+    if (hay_regalo == 1) {
+        regalo = (rand() % (REGALO_MAXIMO - REGALO_MINIMO + 1)) + REGALO_MINIMO;
+        regalarRecursos(actual, regalo);
     }
 }
 
@@ -298,6 +328,11 @@ void controlarEmergencias(struct Comuna *inicio, int cantidadComunas, int *turno
     */
     int indiceComuna = 0;
     struct Comuna *actual = NULL;
+
+    // Si no hay comunas no se puede generar ninguna emergencia (evita dividir entre 0 en rand() % cantidadComunas)
+    if (cantidadComunas <= 0) {
+        return;
+    }
 
     *turnosHastaEmergencia = *turnosHastaEmergencia - 1; // Disminuir el contador de turnos hasta la próxima emergencia
 
@@ -645,5 +680,145 @@ void trueque(struct Comuna *comunaSolicitante, struct Comuna *comunaProveedora, 
         truequeBienes(comunaSolicitante, comunaProveedora, nombre_buscado, cantidad_buscada);
     } else {
         printf("Opcion no valida.\n");
+    }
+}
+
+int hayRegalo(void) {
+    /*
+    Funcionamiento: Decide al azar si una emergencia va a recibir un regalo de otra comuna, con la probabilidad PROBABILIDAD_REGALO (en porcentaje)
+    Entradas: ninguna
+    Salidas: 1 si hay regalo, 0 si no
+    */
+    int tirada = 0; // Numero al azar entre 0 y 99
+
+    tirada = rand() % 100;
+    if (tirada < PROBABILIDAD_REGALO) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int regalarRecursos(struct Comuna *comunaAfectada, int regalo) {
+    /*
+    Funcionamiento: Recorre las demas comunas una por una, empezando por la siguiente a la afectada, y la primera que pueda regalar sin quedar en emergencia le pasa la cantidad indicada a la comuna afectada, sin pedir nada a cambio. El recurso regalado es el que tiene menos cantidad en la comuna afectada. Solo se regalan recursos, nunca servicios
+    Entradas: comunaAfectada (puntero a la comuna que recibe el regalo),
+              regalo (cantidad que se regala)
+    Salidas: 1 si se hizo el regalo (e imprime un mensaje), 0 si no se pudo (no imprime nada)
+    */
+    struct Recursos *receptor_recurso = NULL; // Recurso de la comuna afectada que recibe el regalo (el que tiene menos cantidad)
+    struct Recursos *donante_recurso = NULL; // Mismo recurso, pero en la comuna que regala
+    struct Comuna *donante = NULL; // Comuna que se esta revisando para ver si puede regalar
+    int personas_donante = 0; // Cantidad de personas de la comuna que se esta revisando
+    int puede_dar = 0; // Indica si la comuna que se esta revisando puede regalar sin quedar en riesgo
+    int cantidad_final = 0; // Cantidad que tendria la comuna afectada despues de recibir, para compararla con su maximo
+
+    if (comunaAfectada == NULL || regalo <= 0) {
+        return 0;
+    }
+
+    // Buscar el recurso con menos cantidad en la comuna afectada (el nombre vacio no excluye ninguno)
+    receptor_recurso = encontrarRecursoMasBajo(comunaAfectada->bienes, "");
+    if (receptor_recurso == NULL) {
+        return 0;
+    }
+
+    // Verificar que la comuna afectada no pase de su cantidad maxima al recibir el regalo
+    cantidad_final = receptor_recurso->cantidad + regalo;
+    if (cantidad_final > receptor_recurso->cantidadMaxima) {
+        return 0;
+    }
+
+    // Recorrer las demas comunas hasta encontrar una que pueda regalar
+    donante = comunaAfectada->siguiente;
+    while (donante != comunaAfectada) {
+        donante_recurso = buscarRecurso(donante->bienes, receptor_recurso->nombre);
+        if (donante_recurso != NULL) {
+            personas_donante = recorrerPersonas(donante->personas);
+            puede_dar = puedeDarRecurso(donante_recurso, personas_donante, regalo);
+            if (puede_dar == 1) {
+                donante_recurso->cantidad = donante_recurso->cantidad - regalo;
+                receptor_recurso->cantidad = receptor_recurso->cantidad + regalo;
+                printf("%s le regalo %d de %s a %s, sin pedir nada a cambio.\n", donante->nombre, regalo, receptor_recurso->nombre, comunaAfectada->nombre);
+                return 1;
+            }
+        }
+        donante = donante->siguiente;
+    }
+
+    return 0;
+}
+
+void mostrarEmergencias(struct Comuna *inicio) {
+    /*
+    Funcionamiento: recorre la lista circular de comunas y muestra cuales tienen bienes
+    o servicios en emergencia, junto con su cantidad actual y su cantidad maxima.
+    Usa los indicadores de emergencia que calcula actualizarIndices, por lo que
+    conviene llamarla despues de esa funcion.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular)
+    Salidas: ninguna (imprime en pantalla)
+    */
+    struct Comuna *actual = inicio;
+    struct Recursos *r = NULL;
+    struct Servicios *s = NULL;
+    int emergencias_comuna = 0;
+    int comunas_en_emergencia = 0;
+
+    if (inicio == NULL) {
+        return;
+    }
+
+    printf("Comunas en emergencia:\n");
+
+    while (1) {
+        // Contar cuantas emergencias tiene esta comuna
+        emergencias_comuna = 0;
+
+        r = actual->bienes;
+        while (r != NULL) {
+            if (r->emergencias == 1) {
+                emergencias_comuna = emergencias_comuna + 1;
+            }
+            r = r->siguiente;
+        }
+
+        s = actual->servicios;
+        while (s != NULL) {
+            if (s->emergencias == 1) {
+                emergencias_comuna = emergencias_comuna + 1;
+            }
+            s = s->siguiente;
+        }
+
+        // Si tiene alguna, mostrar el detalle
+        if (emergencias_comuna > 0) {
+            comunas_en_emergencia = comunas_en_emergencia + 1;
+            printf("%s:\n", actual->nombre);
+
+            r = actual->bienes;
+            while (r != NULL) {
+                if (r->emergencias == 1) {
+                    printf("  - Bien %s: %d de %d\n", r->nombre, r->cantidad, r->cantidadMaxima);
+                }
+                r = r->siguiente;
+            }
+
+            s = actual->servicios;
+            while (s != NULL) {
+                if (s->emergencias == 1) {
+                    printf("  - Servicio %s: %d de %d\n", s->nombre, s->cantidad, s->cantidadMaxima);
+                }
+                s = s->siguiente;
+            }
+        }
+
+        actual = actual->siguiente;
+        if (actual == inicio) {
+            break;
+        }
+    }
+
+    if (comunas_en_emergencia == 0) {
+        printf("Ninguna comuna esta en emergencia.\n");
     }
 }
