@@ -484,6 +484,7 @@ void truequeBienes(struct Comuna *comunaSolicitante, struct Comuna *comunaProvee
     printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
     printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_pedida, B_recurso_pedido->nombre, comunaSolicitante->nombre);
     printf("  Bono de reciprocidad: %s +%d y %s +%d.\n", comunaSolicitante->nombre, A_bono_solicitante, comunaProveedora->nombre, B_bono_proveedora);
+    printf("-----------------------------------------------------------------------------------------------------\n");
     pedirConfirmacion(&respuesta);
     if (respuesta == 2) {
         printf("No se acepto el trueque.\n");
@@ -633,6 +634,7 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
     printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
     printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_buscada, B_servicio_pedido->nombre, comunaSolicitante->nombre);
     printf("  Bono de reciprocidad: cada comuna recibe +%d.\n", bono);
+    printf("-----------------------------------------------------------------------------------------------------\n");
     pedirConfirmacion(&respuesta);
     if (respuesta == 2) {
         printf("No se acepto el trueque.\n");

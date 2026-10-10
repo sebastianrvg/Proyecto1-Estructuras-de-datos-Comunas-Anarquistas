@@ -460,26 +460,22 @@ void pedirConfirmacion(int *respuesta) {
     /*
     Funcionamiento: Le pregunta al usuario si quiere continuar con el intercambio y lee su respuesta (1 = si, 2 = no)
     Entradas: respuesta (puntero donde se guardara la opcion elegida)
-    Salidas: respuesta queda en 1 si acepta, en 2 si no acepta, o en 0 si escribio otra cosa o ya no hay mas datos que leer
+    Salidas: respuesta queda en 1 si acepta, en 2 si no acepta, o en 0 si escribio otra cosa
     */
-    char texto[20]; // Texto que escribe el usuario
-    char *leido = NULL; // Resultado de leer el texto (NULL si ya no hay mas datos)
+    char error[100]; // Para descartar lo que escriba el usuario si no es un numero
     int opcion = 0; // Numero que escribio el usuario
-    int convertidos = 0; // Cantidad de numeros que se pudieron leer del texto
 
     *respuesta = 0;
 
     printf("Desea continuar con el intercambio? (1 = si, 2 = no): ");
-    leido = fgets(texto, sizeof(texto), stdin);
-    if (leido == NULL) {
-        printf("\n");
+    if (scanf("%d", &opcion) != 1) {
+        scanf("%99s", error);
+        printf("-----------------------------------------------------------------------------------------------------\n");
         return;
     }
-    convertidos = sscanf(texto, "%d", &opcion);
-    if (convertidos == 1) {
-        if (opcion == 1 || opcion == 2) {
-            *respuesta = opcion;
-        }
+    printf("-----------------------------------------------------------------------------------------------------\n");
+    if (opcion == 1 || opcion == 2) {
+        *respuesta = opcion;
     }
 }
 

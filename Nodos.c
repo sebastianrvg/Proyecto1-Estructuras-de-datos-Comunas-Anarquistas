@@ -143,9 +143,7 @@ int recorrerServicios(struct Servicios *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista circular de comunas y cuenta cuantas
-hay. Como es circular, el recorrido se corta cuando se vuelve a llegar
-al nodo de inicio, no cuando se encuentra un NULL.
+Funcionamiento: recorre la lista circular de comunas y cuenta cuantas hay.
 Entradas: lista (inicio de la lista circular)
 Salidas: cantidad de comunas en la lista
 */
@@ -159,10 +157,13 @@ int recorrerComunas(struct Comuna *lista) {
 
     cantidad = 0;
     actual = lista;
-    do {
+    while (1) {
         cantidad = cantidad + 1;
         actual = actual->siguiente;
-    } while (actual != lista);
+        if (actual == lista) {
+            break;
+        }
+    }
 
     return cantidad;
 }
@@ -229,24 +230,38 @@ void mostrarServicios(struct Servicios *lista) {
 
 /*
 Funcionamiento: recorre la lista circular de comunas e imprime nombre,
-necesidad y satisfaccion de cada una. Mismo cuidado que recorrerComunas
-con el corte del recorrido.
+cantidad de personas, bienes y servicios, necesidad y satisfaccion de cada
+una, con una linea de separacion entre comunas.
 Entradas: lista (inicio de la lista circular)
 Salidas: ninguna (imprime en pantalla)
 */
 void mostrarComunas(struct Comuna *lista) {
     struct Comuna *actual;
+    int personas = 0; // Cantidad de personas de la comuna
+    int bienes = 0; // Cantidad de bienes de la comuna
+    int servicios = 0; // Cantidad de servicios de la comuna
 
     if (lista == NULL) {
         return;
     }
 
     actual = lista;
-    do {
-        printf("%s | necesidad: %.2f | satisfaccion: %.2f\n",
-               actual->nombre, actual->necesidad, actual->satisfaccion);
+    while (1) {
+        personas = recorrerPersonas(actual->personas);
+        bienes = recorrerRecursos(actual->bienes);
+        servicios = recorrerServicios(actual->servicios);
+
+        printf("Comuna: %s\n", actual->nombre);
+        printf("Personas: %d\n", personas);
+        printf("Bienes: %d | Servicios: %d\n", bienes, servicios);
+        printf("Necesidad: %.2f\n", actual->necesidad);
+        printf("Satisfaccion: %.2f\n", actual->satisfaccion);
         actual = actual->siguiente;
-    } while (actual != lista);
+        if (actual == lista) {
+            break;
+        }
+        printf("-----------------------------------------------------------------------------------------------------\n");
+    }
 }
 
 // ==================== INSERTAR Y LEER ==================== 
