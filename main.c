@@ -4,12 +4,13 @@
 #include <time.h>
 #include "Nodos.h"
 #include "Funciones_Gustavo.h"
+#include "Sociedad.h"
 
 void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     /*
     Funcionamiento: guia al usuario para hacer un trueque: elige la comuna que solicita, la que provee, si es de servicios o bienes, que pide y cuanto. Luego llama a trueque y actualiza los indices.
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
-              cantidadComunas (numero total de comunas)
+    cantidadComunas (numero total de comunas)
     Salidas: ninguna (si algun dato no es valido, cancela el trueque)
     */
     struct Comuna *actual = inicio;
@@ -145,9 +146,12 @@ int main() {
 
     printf("\n-------------------------- Bienvenido a la sociedad de comunas anarquistas --------------------------\n\n");
 
-    // PENDIENTE: aqui se crea la sociedad (inicio y cantidad_comunas) pidiendole al usuario las cantidades
+    // Crear la sociedad: se leen los archivos y se le piden las cantidades al usuario
+    inicio = crearSociedad();
+    cantidad_comunas = recorrerComunas(inicio);
+
     if (inicio == NULL) {
-        printf("La sociedad todavia no esta creada.\n");
+        printf("No se pudo crear la sociedad.\n");
         return 0;
     }
 
@@ -194,6 +198,9 @@ int main() {
             printf("Opcion invalida.\n");
         }
     }
+
+    // Liberar toda la memoria de la sociedad antes de terminar
+    liberarComunas(inicio);
 
     return 0;
 }
