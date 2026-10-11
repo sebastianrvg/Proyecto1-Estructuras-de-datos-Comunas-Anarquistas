@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Sociedad.h"
+#include "Colores.h"
 
-// DATOS
+// ==================== PEDIR DATOS ====================
 
 /*
 Funcionamiento: le pide un numero entero al usuario y repite la pregunta hasta que escriba uno dentro del rango. Si se acaba la entrada de datos devuelve el minimo para no quedarse en un ciclo infinito.
@@ -36,7 +37,8 @@ int pedirCantidad(char mensaje[], int minimo, int maximo) {
     return numero;
 }
 
-// ELEGIR
+// ==================== ELEGIR ====================
+
 /*
 Funcionamiento: elige al azar una cantidad exacta de comunas de la lista de comunas disponibles y las copia (solo el nombre) en una lista circular nueva. Cada comuna disponible tiene la misma probabilidad de ser elegida.
 Entradas: disponibles (lista circular con todas las comunas del archivo), cantidadDisponibles (cuantas hay en esa lista), cantidadElegir (cuantas se quieren elegir)
@@ -111,7 +113,7 @@ struct Servicios *recortarServicios(struct Servicios *lista, int cantidad) {
     return lista;
 }
 
-// REPARTIR Y ASIGNAR
+// ==================== REPARTIR Y ASIGNAR ====================
 
 /*
 Funcionamiento: reparte todas las personas entre las comunas, pasando cada nodo de la lista general a la lista de su comuna. Las cantidades son distintas entre comunas (cada una recibe cerca del promedio de lo que queda, mas o menos la mitad) y todas reciben al menos una persona. La ultima comuna recibe las que sobren. Al terminar, la lista general queda vacia y su puntero ya no se debe usar.
@@ -210,7 +212,7 @@ void asignarServicios(struct Comuna *comuna, struct Servicios *catalogo) {
     }
 }
 
-// CREAR SOCIEDAD
+// ==================== CREAR LA SOCIEDAD ====================
 
 /*
 Funcionamiento: crea la sociedad completa. Lee los archivos personas, bienes, servicios y comunas, le pregunta al usuario cuantas comunas, bienes y servicios quiere, reparte las personas, y le da a cada comuna sus bienes y servicios con sus maximos y cantidades iniciales.
@@ -291,12 +293,12 @@ struct Comuna *crearSociedad(void) {
     liberarRecursos(bienes);
     liberarServicios(servicios);
 
-    printf("Sociedad creada: %d comunas, %d bienes, %d servicios y %d personas.\n", cantidadComunas, cantidadBienes, cantidadServicios, totalPersonas);
+    printf(COLOR_VERDE "Sociedad creada: %d comunas, %d bienes, %d servicios y %d personas.\n" COLOR_RESET, cantidadComunas, cantidadBienes, cantidadServicios, totalPersonas);
 
     return sociedad;
 }
 
-// LIBERAR
+// ==================== LIBERAR ====================
 
 /*
 Funcionamiento: recorre la lista de personas y libera la memoria de cada nodo, uno por uno.

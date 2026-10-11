@@ -3,14 +3,32 @@
 #include <string.h>
 #include <time.h>
 #include "Nodos.h"
-#include "Funciones_Gustavo.h"
+#include "Indices.h"
+#include "Trueque.h"
+#include "PasarDia.h"
+#include "Emergencias.h"
 #include "Sociedad.h"
+#include "Colores.h"
+
+void mostrarLogo(void) {
+    /*
+    Funcionamiento: imprime el logo del proyecto en ASCII al iniciar el programa.
+    Entradas: ninguna
+    Salidas: ninguna (imprime en pantalla)
+    */
+    printf(COLOR_MAGENTA);
+    printf("=========================================================\n");
+    printf("   C O M U N A S   A N A R Q U I S T A S\n");
+    printf("   la economia del regalo y el trueque\n");
+    printf("=========================================================\n");
+    printf(COLOR_RESET);
+}
 
 void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     /*
     Funcionamiento: guia al usuario para hacer un trueque: elige la comuna que solicita, la que provee, si es de servicios o bienes, que pide y cuanto. Luego llama a trueque y actualiza los indices.
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
-    cantidadComunas (numero total de comunas)
+              cantidadComunas (numero total de comunas)
     Salidas: ninguna (si algun dato no es valido, cancela el trueque)
     */
     struct Comuna *actual = inicio;
@@ -27,7 +45,7 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     int cantidad = 0; // Cantidad que se pide
 
     if (cantidadComunas < 2) {
-        printf("Hacen falta al menos 2 comunas para hacer un trueque.\n");
+        printf(COLOR_AMARILLO "Hacen falta al menos 2 comunas para hacer un trueque.\n" COLOR_RESET);
         return;
     }
 
@@ -39,19 +57,19 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
 
     printf("Numero de la comuna que solicita: ");
     if (scanf("%d", &numero_solicitante) != 1) {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         scanf("%99s", error);
         return;
     }
     printf("Numero de la comuna que provee: ");
     if (scanf("%d", &numero_proveedora) != 1) {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         scanf("%99s", error);
         return;
     }
     printf("-----------------------------------------------------------------------------------------------------\n");
     if (numero_solicitante < 1 || numero_solicitante > cantidadComunas || numero_proveedora < 1 || numero_proveedora > cantidadComunas) {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         return;
     }
     solicitante = avanzarComunas(inicio, numero_solicitante - 1, cantidadComunas);
@@ -59,7 +77,7 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
 
     printf("Tipo de trueque (1 = servicios, 2 = bienes): ");
     if (scanf("%d", &tipo) != 1) {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         scanf("%99s", error);
         return;
     }
@@ -86,12 +104,12 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
         printf("-----------------------------------------------------------------------------------------------------\n");
         printf("Numero del bien que solicita: ");
     } else {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         return;
     }
 
     if (scanf("%d", &opcion) != 1) {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         scanf("%99s", error);
         return;
     }
@@ -104,7 +122,7 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
             servicio = servicio->siguiente;
         }
         if (opcion < 1 || servicio == NULL) {
-            printf("Opcion invalida.\n");
+            printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
             return;
         }
         strcpy(nombre_item, servicio->nombre);
@@ -114,7 +132,7 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
             recurso = recurso->siguiente;
         }
         if (opcion < 1 || recurso == NULL) {
-            printf("Opcion invalida.\n");
+            printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
             return;
         }
         strcpy(nombre_item, recurso->nombre);
@@ -122,7 +140,7 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
 
     printf("Cantidad que solicita: ");
     if (scanf("%d", &cantidad) != 1) {
-        printf("Opcion invalida.\n");
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         scanf("%99s", error);
         return;
     }
@@ -144,6 +162,7 @@ int main() {
     srand(time(NULL));
     turnosHastaEmergencia = (rand() % 4) + 4;
 
+    mostrarLogo();
     printf("\n-------------------------- Bienvenido a la sociedad de comunas anarquistas --------------------------\n\n");
 
     // Crear la sociedad: se leen los archivos y se le piden las cantidades al usuario
@@ -151,14 +170,14 @@ int main() {
     cantidad_comunas = recorrerComunas(inicio);
 
     if (inicio == NULL) {
-        printf("No se pudo crear la sociedad.\n");
+        printf(COLOR_ROJO "No se pudo crear la sociedad.\n" COLOR_RESET);
         return 0;
     }
 
     actualizarIndices(inicio, cantidad_comunas);
 
     while (i == -1) {
-        printf("---------------------------------------------- Dia %02d -----------------------------------------------\n", dia);
+        printf(COLOR_CYAN "---------------------------------------------- Dia %02d -----------------------------------------------\n" COLOR_RESET, dia);
         printf("1. Hacer un trueque\n");
         printf("2. Pasar al dia siguiente\n");
         printf("3. Ver comunas (necesidad y satisfaccion)\n");
@@ -167,7 +186,7 @@ int main() {
         printf("-----------------------------------------------------------------------------------------------------\n");
         printf("Elija una opcion: ");
         if (scanf("%d", &opcion) != 1) {
-            printf("Opcion invalida.\n");
+            printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
             scanf("%99s", error);
             continue;
         }
@@ -187,15 +206,15 @@ int main() {
             mostrarComunas(inicio);
 
         } else if (opcion == 4) {
-            printf("-------------------------------------------- Emergencias --------------------------------------------\n");
+            printf(COLOR_ROJO "-------------------------------------------- Emergencias --------------------------------------------\n" COLOR_RESET);
             mostrarEmergencias(inicio);
 
         } else if (opcion == 5) {
-            printf("Saliendo.\n");
+            printf(COLOR_MAGENTA "Saliendo.\n" COLOR_RESET);
             i = 0;
 
         } else {
-            printf("Opcion invalida.\n");
+            printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         }
     }
 

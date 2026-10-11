@@ -4,7 +4,7 @@
 /*
 Consumo de bienes por persona en cada turno. Todas las funciones que aplican
 o estiman consumo usan estas mismas constantes, para que el modelo sea el mismo
-en toda la simulacion. El promedio es el punto medio entre el minimo y el maximo.
+en toda la simulación. El promedio es el punto medio entre el mínimo y el máximo.
 */
 #define CONSUMO_MINIMO_POR_PERSONA 1
 #define CONSUMO_MAXIMO_POR_PERSONA 5
@@ -12,12 +12,12 @@ en toda la simulacion. El promedio es el punto medio entre el minimo y el maximo
 
 /*
 Cada punto de gravedad de una emergencia quita este porcentaje de la cantidad
-maxima del recurso o servicio afectado (con un minimo de 1 unidad).
+máxima del recurso o servicio afectado (con un mínimo de 1 unidad).
 */
 #define PORCENTAJE_PERDIDA_POR_PUNTO 5
 
 /*
-Porcentaje de la cantidad intercambiada que cada comuna recibe de mas en un
+Porcentaje de la cantidad intercambiada que cada comuna recibe de más en un
 trueque (bono de reciprocidad). Es lo que hace subir el valor de los bienes
 y servicios cuando las comunas cooperan.
 */
@@ -25,7 +25,7 @@ y servicios cuando las comunas cooperan.
 
 
 /*
-Regalo despues de una emergencia: probabilidad (en porcentaje) de que otra comuna
+Regalo después de una emergencia: probabilidad (en porcentaje) de que otra comuna
 le regale recursos a la comuna afectada, y rango de la cantidad que se regala.
 */
 #define PROBABILIDAD_REGALO 25
@@ -41,7 +41,7 @@ struct Recursos {
     char nombre[50]; // Nombre del recurso
     int cantidad; // Cantidad actual del recurso
     int cantidadMaxima; // Cantidad máxima que puede ser almacenada
-    int emergencias; // 1 si el recurso esta en emergencia (no alcanza para 2 turnos de consumo), 0 si no
+    int emergencias; // 1 si el recurso está en emergencia (no alcanza para 2 turnos de consumo), 0 si no
     struct Recursos *siguiente; 
 };
 
@@ -54,8 +54,8 @@ struct Servicios {
     char nombre[50]; // Nombre del servicio
     int cantidad; // Cantidad actual del servicio
     int cantidadMaxima; // Cantidad máxima que puede ser ofrecida
-    int emergencias; // 1 si el servicio esta en emergencia (menos del 20% del reparto esperado), 0 si no
-    int oficio; // Numero que identifica el servicio, es el mismo que usa Persona (posicion en el archivo, empieza en 1)
+    int emergencias; // 1 si el servicio está en emergencia (menos del 20% del reparto esperado), 0 si no
+    int oficio; // Número que identifica el servicio, es el mismo que usa Persona (posición en el archivo, empieza en 1)
     struct Servicios *siguiente;
 };
 
@@ -67,7 +67,7 @@ Salidas: ninguna (es una definición de tipo)
 */
 struct Persona {
     char nombre[50];
-    int oficio; // Numero del servicio al que pertenece la persona (0 si todavia no tiene)
+    int oficio; // Número del servicio al que pertenece la persona (0 si todavía no tiene)
     struct Persona *siguiente;
 };
 
@@ -86,7 +86,7 @@ struct Comuna {
     struct Comuna *siguiente;
 };
 
-// ==================== CREAR ====================
+// CREAR
 
 /*
 Funcionamiento: reserva memoria para una nueva persona y copia su nombre.
@@ -112,7 +112,7 @@ struct Servicios *crearServicio(char nombre[], int cantidad, int cantidadMaxima)
 
 struct Comuna *crearNodoCircular(struct Comuna *lista, char nombre[]);
 
-// ==================== RECORRER ====================
+// RECORRER
 
 /*
 Funcionamiento: recorre la lista de personas y cuenta cuántas hay.
@@ -122,21 +122,21 @@ Salidas: cantidad de personas en la lista
 int recorrerPersonas(struct Persona *lista);
 
 /*
-Funcionamiento: recorre la lista de recursos y cuenta cuantos hay.
+Funcionamiento: recorre la lista de recursos y cuenta cuántos hay.
 Entradas: lista (inicio de la lista)
 Salidas: cantidad de recursos en la lista
 */
 int recorrerRecursos(struct Recursos *lista);
 
 /*
-Funcionamiento: recorre la lista de servicios y cuenta cuantos hay.
+Funcionamiento: recorre la lista de servicios y cuenta cuántos hay.
 Entradas: lista (inicio de la lista)
 Salidas: cantidad de servicios en la lista
 */
 int recorrerServicios(struct Servicios *lista);
 
 /*
-Funcionamiento: recorre la lista circular de comunas y cuenta cuantas hay.
+Funcionamiento: recorre la lista circular de comunas y cuenta cuántas hay.
 Entradas: lista (inicio de la lista circular)
 Salidas: cantidad de comunas en la lista
 */
@@ -144,7 +144,7 @@ int recorrerComunas(struct Comuna *lista);
 
 struct Comuna *avanzarComunas(struct Comuna *actual, int pasos, int cantidadComunas);
 
-// ==================== MOSTRAR ==================== 
+// MOSTRAR
 
 /*
 Funcionamiento: recorre la lista de personas e imprime el nombre de cada una.
@@ -168,13 +168,13 @@ Salidas: ninguna (imprime en pantalla)
 void mostrarServicios(struct Servicios *lista);
 
 /*
-Funcionamiento: recorre la lista circular de comunas e imprime nombre, necesidad y satisfaccion de cada una.
+Funcionamiento: recorre la lista circular de comunas e imprime nombre, necesidad y satisfacción de cada una.
 Entradas: lista (inicio de la lista circular)
 Salidas: ninguna (imprime en pantalla)
 */
 void mostrarComunas(struct Comuna *lista);
 
-// ==================== INSERTAR Y LEER ==================== 
+// INSERTAR Y LEER
 
 /*
 Funcionamiento: inserta una persona al final de la lista enlazada simple.
@@ -198,25 +198,25 @@ Salidas: lista actualizada (la misma, o el servicio nuevo como inicio si estaba 
 struct Servicios *insertarServicio(struct Servicios *lista, struct Servicios *nueva);
 
 /*
-Funcionamiento: abre el archivo de personas, lee un nombre por linea y
+Funcionamiento: abre el archivo de personas, lee un nombre por línea y
 construye la lista enlazada simple completa. A cada persona le asigna un
 oficio al azar entre 1 y cantidadOficios.
 Entradas: nombreArchivo (ruta o nombre del archivo a leer),
-cantidadOficios (cantidad de servicios activos en la simulacion)
+cantidadOficios (cantidad de servicios activos en la simulación)
 Salidas: puntero al inicio de la lista de personas cargada
 */
 struct Persona *leerPersonas(char nombreArchivo[], int cantidadOficios);
 
 /*
-Funcionamiento: abre el archivo de bienes y construye la lista de recursos del catalogo base (cantidad y cantidadMaxima en 0).
+Funcionamiento: abre el archivo de bienes y construye la lista de recursos del catálogo base (cantidad y cantidadMaxima en 0).
 Entradas: nombreArchivo (ruta o nombre del archivo a leer)
 Salidas: puntero al inicio de la lista de recursos cargada
 */
 struct Recursos *leerRecursos(char nombreArchivo[]);
 
 /*
-Funcionamiento: abre el archivo de servicios y construye la lista del catalogo base (cantidad y cantidadMaxima en 0).
-Ignora las lineas vacias y le da a cada servicio su numero de oficio segun su posicion en el archivo (empieza en 1).
+Funcionamiento: abre el archivo de servicios y construye la lista del catálogo base (cantidad y cantidadMaxima en 0).
+Ignora las líneas vacías y le da a cada servicio su número de oficio según su posición en el archivo (empieza en 1).
 Entradas: nombreArchivo (ruta o nombre del archivo a leer)
 Salidas: puntero al inicio de la lista de servicios cargada
 */
@@ -229,7 +229,7 @@ Salidas: puntero al inicio de la lista circular de comunas cargada
 */
 struct Comuna *leerComunas(char nombreArchivo[]);
 
-/* ==================== LIBERAR ==================== */
+// LIBERAR
 
 /*
 Funcionamiento: recorre la lista de recursos y libera la memoria de cada nodo, uno por uno.

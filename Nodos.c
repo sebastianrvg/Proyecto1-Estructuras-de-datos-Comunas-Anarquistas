@@ -3,7 +3,7 @@
 #include <string.h>
 #include "Nodos.h"
 
-// ==================== CREAR ==================== 
+// CREAR
 
 /*
 Funcionamiento: reserva memoria para una nueva persona y copia su nombre.
@@ -83,7 +83,7 @@ struct Comuna *crearNodoCircular(struct Comuna *lista, char nombre[]) {
     return lista;
 }
 
-// ==================== RECORRER ==================== 
+// RECORRER
 
 /*
 Funcionamiento: recorre la lista de personas y cuenta cuántas hay.
@@ -105,7 +105,7 @@ int recorrerPersonas(struct Persona *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista de recursos y cuenta cuantos hay.
+Funcionamiento: recorre la lista de recursos y cuenta cuántos hay.
 Entradas: lista (inicio de la lista)
 Salidas: cantidad de recursos en la lista
 */
@@ -124,7 +124,7 @@ int recorrerRecursos(struct Recursos *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista de servicios y cuenta cuantos hay.
+Funcionamiento: recorre la lista de servicios y cuenta cuántos hay.
 Entradas: lista (inicio de la lista)
 Salidas: cantidad de servicios en la lista
 */
@@ -143,7 +143,7 @@ int recorrerServicios(struct Servicios *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista circular de comunas y cuenta cuantas hay.
+Funcionamiento: recorre la lista circular de comunas y cuenta cuántas hay.
 Entradas: lista (inicio de la lista circular)
 Salidas: cantidad de comunas en la lista
 */
@@ -178,7 +178,7 @@ struct Comuna *avanzarComunas(struct Comuna *actual, int pasos, int cantidadComu
     return actual;
 }
 
-// ==================== MOSTRAR ==================== 
+// MOSTRAR 
 
 /*
 Funcionamiento: recorre la lista de personas e imprime el nombre de cada una.
@@ -230,8 +230,8 @@ void mostrarServicios(struct Servicios *lista) {
 
 /*
 Funcionamiento: recorre la lista circular de comunas e imprime nombre,
-cantidad de personas, bienes y servicios, necesidad y satisfaccion de cada
-una, con una linea de separacion entre comunas.
+cantidad de personas, bienes y servicios, necesidad y satisfacción de cada
+una, con una línea de separación entre comunas.
 Entradas: lista (inicio de la lista circular)
 Salidas: ninguna (imprime en pantalla)
 */
@@ -264,7 +264,7 @@ void mostrarComunas(struct Comuna *lista) {
     }
 }
 
-// ==================== INSERTAR Y LEER ==================== 
+// INSERTAR Y LEER
 
 /*
 Funcionamiento: inserta una persona al final de la lista enlazada simple.
@@ -334,11 +334,11 @@ struct Servicios *insertarServicio(struct Servicios *lista, struct Servicios *nu
 }
 
 /*
-Funcionamiento: abre el archivo de personas, lee un nombre por linea y
+Funcionamiento: abre el archivo de personas, lee un nombre por línea y
 construye la lista enlazada simple completa. A cada persona le asigna un
 oficio al azar entre 1 y cantidadOficios.
 Entradas: nombreArchivo (ruta o nombre del archivo a leer),
-cantidadOficios (cantidad de servicios activos en la simulacion)
+cantidadOficios (cantidad de servicios activos en la simulación)
 Salidas: puntero al inicio de la lista de personas cargada
 */
 struct Persona *leerPersonas(char nombreArchivo[], int cantidadOficios) {
@@ -375,10 +375,10 @@ struct Persona *leerPersonas(char nombreArchivo[], int cantidadOficios) {
 }
 
 /*
-Funcionamiento: abre el archivo de bienes, lee un nombre por linea y
-construye la lista enlazada simple del catalogo base de recursos. La
-cantidad y la cantidadMaxima quedan en 0 porque todavia no se sabe a que
-comuna van a pertenecer ni cuantas personas tiene esa comuna.
+Funcionamiento: abre el archivo de bienes, lee un nombre por línea y
+construye la lista enlazada simple del catálogo base de recursos. La
+cantidad y la cantidadMaxima quedan en 0 porque todavía no se sabe a qué
+comuna van a pertenecer ni cuántas personas tiene esa comuna.
 Entradas: nombreArchivo (ruta o nombre del archivo a leer)
 Salidas: puntero al inicio de la lista de recursos cargada
 */
@@ -412,11 +412,11 @@ struct Recursos *leerRecursos(char nombreArchivo[]) {
 }
 
 /*
-Funcionamiento: abre el archivo de servicios, lee un nombre por linea y
-construye la lista enlazada simple del catalogo base de servicios. La
-cantidad y la cantidadMaxima quedan en 0 por la misma razon que en
-recursos. Ignora las lineas vacias y el oficio de cada servicio es su
-posicion en el archivo (empieza en 1).
+Funcionamiento: abre el archivo de servicios, lee un nombre por línea y
+construye la lista enlazada simple del catálogo base de servicios. La
+cantidad y la cantidadMaxima quedan en 0 por la misma razón que en
+recursos. Ignora las líneas vacías y el oficio de cada servicio es su
+posición en el archivo (empieza en 1).
 Entradas: nombreArchivo (ruta o nombre del archivo a leer)
 Salidas: puntero al inicio de la lista de servicios cargada
 */
@@ -456,7 +456,7 @@ struct Servicios *leerServicios(char nombreArchivo[]) {
 }
 
 /*
-Funcionamiento: abre el archivo de comunas, lee un nombre por linea y
+Funcionamiento: abre el archivo de comunas, lee un nombre por línea y
 construye la lista circular usando crearNodoCircular, que ya crea e
 inserta el nodo en un solo paso.
 Entradas: nombreArchivo (ruta o nombre del archivo a leer)
@@ -489,7 +489,7 @@ struct Comuna *leerComunas(char nombreArchivo[]) {
     return lista;
 }
 
-// ==================== LIBERAR ==================== 
+// LIBERAR
 
 /*
 Funcionamiento: recorre la lista de recursos y libera la memoria de cada
