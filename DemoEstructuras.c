@@ -101,7 +101,7 @@ void demostrarListaCircular(void) {
 
 int main(void) {
     demostrarListaSimple();
-    demoatrarListaCircular();
+    demostrarListaCircular();
 
     return 0;
 }
