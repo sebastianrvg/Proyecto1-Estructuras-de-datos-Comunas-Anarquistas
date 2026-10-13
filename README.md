@@ -1,3 +1,4 @@
+
 # Comunas Anarquistas
 
 Proyecto 1 del curso de Estructuras de Datos. Simulación en C de una sociedad solarpunk organizada en comunas anarquistas que gestionan personas, bienes y servicios, y que se ayudan mediante trueque y regalo, sin usar dinero. El éxito de la sociedad se mide con la satisfacción de las personas.
@@ -23,7 +24,8 @@ Al iniciar, el programa pide cuántas comunas (2 a 50), cuántos bienes (1 a 25)
 2. Pasar al día siguiente
 3. Ver comunas (necesidad y satisfacción)
 4. Ver comunas en emergencia
-5. Salir
+5. Ver detalle de una comuna (cantidad de cada bien o servicio)
+6. Salir
 
 Ejemplo de un trueque (los números cambian en cada ejecución porque hay azar):
 
@@ -64,7 +66,7 @@ Los nombres de línea no deben pasar de 48 caracteres, y los archivos no llevan 
 | PasarDia.c/.h     | pasarTurno: lo que ocurre al pasar un día.                                                                                                             |
 | DemoEstructuras.c | Programa aparte que demuestra la lista simple y la lista circular.                                                                                      |
 | Colores.h         | Códigos de color para la terminal.                                                                                                                     |
-| main.c            | Menú principal y menú del trueque.                                                                                                                    |
+| main.c            | Menú principal, menú del trueque y detalle de una comuna.                                                                                             |
 
 ## Concepto del proyecto
 

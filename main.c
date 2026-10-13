@@ -150,6 +150,66 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     actualizarIndices(inicio, cantidadComunas);
 }
 
+void menuDetalleComuna(struct Comuna *inicio, int cantidadComunas) {
+    /*
+    Funcionamiento: pide una comuna y si se quieren ver sus bienes o sus servicios, y muestra la cantidad actual de cada uno junto con su maximo.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular),
+              cantidadComunas (numero total de comunas)
+    Salidas: ninguna (imprime en pantalla; si algun dato no es valido, cancela)
+    */
+    struct Comuna *actual = inicio;
+    struct Comuna *elegida = NULL;
+    struct Recursos *recurso = NULL;
+    struct Servicios *servicio = NULL;
+    char error[100];
+    int numero = 0;
+    int tipo = 0; // 1 = servicios, 2 = bienes
+
+    for (int i = 1; i <= cantidadComunas; i++) {
+        printf("%d. %s\n", i, actual->nombre);
+        actual = actual->siguiente;
+    }
+    printf("-----------------------------------------------------------------------------------------------------\n");
+
+    printf("Numero de la comuna que desea ver: ");
+    if (scanf("%d", &numero) != 1) {
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
+        scanf("%99s", error);
+        return;
+    }
+    if (numero < 1 || numero > cantidadComunas) {
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
+        return;
+    }
+    elegida = avanzarComunas(inicio, numero - 1, cantidadComunas);
+
+    printf("Que desea ver (1 = servicios, 2 = bienes): ");
+    if (scanf("%d", &tipo) != 1) {
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
+        scanf("%99s", error);
+        return;
+    }
+    printf("-----------------------------------------------------------------------------------------------------\n");
+
+    if (tipo == 1) {
+        printf("Servicios de %s (personas disponibles de maximo)\n", elegida->nombre);
+        servicio = elegida->servicios;
+        while (servicio != NULL) {
+            printf("  %s: %d de %d\n", servicio->nombre, servicio->cantidad, servicio->cantidadMaxima);
+            servicio = servicio->siguiente;
+        }
+    } else if (tipo == 2) {
+        printf("Bienes de %s (cantidad actual de maximo)\n", elegida->nombre);
+        recurso = elegida->bienes;
+        while (recurso != NULL) {
+            printf("  %s: %d de %d\n", recurso->nombre, recurso->cantidad, recurso->cantidadMaxima);
+            recurso = recurso->siguiente;
+        }
+    } else {
+        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
+    }
+}
+
 int main() {
     struct Comuna *inicio = NULL;
     int i = -1;
@@ -182,7 +242,8 @@ int main() {
         printf("2. Pasar al dia siguiente\n");
         printf("3. Ver comunas (necesidad y satisfaccion)\n");
         printf("4. Ver comunas en emergencia\n");
-        printf("5. Salir\n");
+        printf("5. Ver detalle de una comuna (cantidad de cada bien o servicio)\n");
+        printf("6. Salir\n");
         printf("-----------------------------------------------------------------------------------------------------\n");
         printf("Elija una opcion: ");
         if (scanf("%d", &opcion) != 1) {
@@ -210,6 +271,10 @@ int main() {
             mostrarEmergencias(inicio);
 
         } else if (opcion == 5) {
+            printf("------------------------------------------ Detalle de comuna ----------------------------------------\n");
+            menuDetalleComuna(inicio, cantidad_comunas);
+
+        } else if (opcion == 6) {
             printf(COLOR_MAGENTA "Saliendo.\n" COLOR_RESET);
             i = 0;
 
