@@ -70,6 +70,8 @@ struct Comuna *crearNodoCircular(struct Comuna *lista, char nombre[]) {
     nueva->servicios = NULL;
     nueva->necesidad = 0;
     nueva->satisfaccion = 0;
+    nueva->regalosDados = 0;
+    nueva->regalosRecibidos = 0;
     if (lista == NULL) {
         nueva->siguiente = nueva;
         return nueva;

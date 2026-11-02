@@ -190,6 +190,7 @@ void menuDetalleComuna(struct Comuna *inicio, int cantidadComunas) {
         return;
     }
     printf("-----------------------------------------------------------------------------------------------------\n");
+    printf("Regalos de %s: dados %d | recibidos %d\n", elegida->nombre, elegida->regalosDados, elegida->regalosRecibidos);
 
     if (tipo == 1) {
         printf("Servicios de %s (personas disponibles de maximo)\n", elegida->nombre);

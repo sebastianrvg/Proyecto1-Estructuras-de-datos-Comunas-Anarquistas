@@ -83,6 +83,8 @@ struct Comuna {
     struct Servicios *servicios; // Lista de servicios disponibles en la comuna
     float necesidad; // Nivel de necesidad de la comuna
     float satisfaccion; // Nivel de satisfacción de la comuna
+    int regalosDados; // Cantidad de regalos que esta comuna ha dado
+    int regalosRecibidos; // Cantidad de regalos que esta comuna ha recibido
     struct Comuna *siguiente;
 };
 

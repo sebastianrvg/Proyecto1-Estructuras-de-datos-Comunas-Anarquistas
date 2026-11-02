@@ -160,6 +160,8 @@ int regalarRecursos(struct Comuna *comunaAfectada, int regalo) {
             if (puede_dar == 1) {
                 donante_recurso->cantidad = donante_recurso->cantidad - regalo;
                 receptor_recurso->cantidad = receptor_recurso->cantidad + regalo;
+                donante->regalosDados = donante->regalosDados + 1;
+                comunaAfectada->regalosRecibidos = comunaAfectada->regalosRecibidos + 1;
                 printf(COLOR_VERDE "%s le regalo %d de %s a %s, sin pedir nada a cambio.\n" COLOR_RESET, donante->nombre, regalo, receptor_recurso->nombre, comunaAfectada->nombre);
                 return 1;
             }
