@@ -123,6 +123,21 @@ float calcularSatisfaccion(struct Comuna *actual, int cantidadComunas) {
     return satisfaccion_final;
 }
 
+float calcularReciprocidad(struct Comuna *comuna) {
+    /*
+    Funcionamiento: calcula el balance entre los regalos dados y recibidos por una comuna. Es 1 si solo dio, -1 si solo recibió y 0 si dio y recibió lo mismo o si no hay regalos.
+    Entradas: comuna (puntero a la comuna de la cual se quiere calcular la reciprocidad)
+    Salidas: balance entre -1 y 1
+    */
+    int total = comuna->regalosDados + comuna->regalosRecibidos;
+
+    if (total == 0) {
+        return 0;
+    }
+
+    return (float)(comuna->regalosDados - comuna->regalosRecibidos) / total;
+}
+
 float calcularNecesidad(struct Comuna *comuna) {
     /*
     Funcionamiento: Calcula la necesidad de una comuna en base a sus recursos y servicios disponibles
@@ -139,6 +154,9 @@ float calcularNecesidad(struct Comuna *comuna) {
     float faltante_servicios = 0;
     float promedio_faltantes = 0;
     float necesidad = 0;
+    float necesidad_local = 0;
+    float reciprocidad = 0;
+    float necesidad_reciprocidad = 0;
 
     // Calcular la suma de las cantidades máximas y actuales de recursos
     while (r != NULL) {
@@ -162,10 +180,21 @@ float calcularNecesidad(struct Comuna *comuna) {
         faltante_servicios = (float)(suma_maximo_servicios - suma_cantidad_servicios) / suma_maximo_servicios;
     }
 
-    // Calcular el promedio de los faltantes de recursos y servicios
+// Calcular el promedio de los faltantes de recursos y servicios
     promedio_faltantes = (faltante_recursos + faltante_servicios) / 2;
 
-    necesidad = 99 * promedio_faltantes;
+    necesidad_local = 99 * promedio_faltantes;
+
+    // Solo aumenta la necesidad si la comuna recibió más regalos de los que dio
+    reciprocidad = calcularReciprocidad(comuna);
+    if (reciprocidad < 0) {
+        necesidad_reciprocidad = 99 * (-reciprocidad);
+    }
+
+    necesidad = necesidad_local + 0.15 * necesidad_reciprocidad;
+    if (necesidad > 99) {
+        necesidad = 99;
+    }
 
     // Actualizar la necesidad de la comuna
     comuna->necesidad = necesidad;
