@@ -138,11 +138,11 @@ float calcularReciprocidad(struct Comuna *comuna) {
     return (float)(comuna->regalosDados - comuna->regalosRecibidos) / total;
 }
 
-float calcularNecesidad(struct Comuna *comuna) {
+float calcularNecesidadLocal(struct Comuna *comuna) {
     /*
-    Funcionamiento: Calcula la necesidad de una comuna en base a sus recursos y servicios disponibles
-    Entradas: comuna (puntero a la comuna de la cual se quiere calcular la necesidad)
-    Salidas: necesidad
+    Funcionamiento: Calcula la necesidad propia de una comuna en base a cuánto le falta para llegar al máximo de sus recursos y servicios, sin tomar en cuenta a otras comunas ni los regalos
+    Entradas: comuna (puntero a la comuna de la cual se quiere calcular la necesidad local)
+    Salidas: necesidad local
     */
     struct Recursos *r = comuna->bienes;
     struct Servicios *s = comuna->servicios;
@@ -153,10 +153,6 @@ float calcularNecesidad(struct Comuna *comuna) {
     float faltante_recursos = 0;
     float faltante_servicios = 0;
     float promedio_faltantes = 0;
-    float necesidad = 0;
-    float necesidad_local = 0;
-    float reciprocidad = 0;
-    float necesidad_reciprocidad = 0;
 
     // Calcular la suma de las cantidades máximas y actuales de recursos
     while (r != NULL) {
@@ -180,10 +176,24 @@ float calcularNecesidad(struct Comuna *comuna) {
         faltante_servicios = (float)(suma_maximo_servicios - suma_cantidad_servicios) / suma_maximo_servicios;
     }
 
-// Calcular el promedio de los faltantes de recursos y servicios
+    // Calcular el promedio de los faltantes de recursos y servicios
     promedio_faltantes = (faltante_recursos + faltante_servicios) / 2;
 
-    necesidad_local = 99 * promedio_faltantes;
+    return 99 * promedio_faltantes;
+}
+
+float calcularNecesidad(struct Comuna *comuna) {
+    /*
+    Funcionamiento: Calcula la necesidad de una comuna a partir de su necesidad local y de su reciprocidad
+    Entradas: comuna (puntero a la comuna de la cual se quiere calcular la necesidad)
+    Salidas: necesidad
+    */
+    float necesidad = 0;
+    float necesidad_local = 0;
+    float reciprocidad = 0;
+    float necesidad_reciprocidad = 0;
+
+    necesidad_local = calcularNecesidadLocal(comuna);
 
     // Solo aumenta la necesidad si la comuna recibió más regalos de los que dio
     reciprocidad = calcularReciprocidad(comuna);

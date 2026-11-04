@@ -9,6 +9,7 @@ float formulaSatisfaccion(struct Comuna *comuna);
 float calcularSatisfaccion(struct Comuna *actual, int cantidadComunas);
 float calcularReciprocidad(struct Comuna *comuna);
 float calcularNecesidad(struct Comuna *comuna);
+float calcularNecesidadLocal(struct Comuna *comuna);
 void actualizarIndices(struct Comuna *inicio, int cantidadComunas);
 
 #endif
