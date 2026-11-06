@@ -182,26 +182,91 @@ float calcularNecesidadLocal(struct Comuna *comuna) {
     return 99 * promedio_faltantes;
 }
 
-float calcularNecesidad(struct Comuna *comuna) {
+float valorComunaVecina(struct Comuna *vecina, int tipo) {
     /*
-    Funcionamiento: Calcula la necesidad de una comuna a partir de su necesidad local y de su reciprocidad
-    Entradas: comuna (puntero a la comuna de la cual se quiere calcular la necesidad)
+    Funcionamiento: Calcula el valor de una comuna vecina que se necesita para promediar. No modifica la comuna
+    Entradas: vecina (puntero a la comuna vecina),
+              tipo (1 = necesidad local, 2 = satisfaccion propia)
+    Salidas: necesidad local si el tipo es 1, satisfaccion propia en cualquier otro caso
+    */
+    if (tipo == 1) {
+        return calcularNecesidadLocal(vecina);
+    }
+
+    return formulaSatisfaccion(vecina);
+}
+
+float promedioVecinas(struct Comuna *actual, int cantidadComunas, int tipo) {
+    /*
+    Funcionamiento: Calcula el promedio de la necesidad local o de la satisfaccion propia de las comunas vecinas, con las mismas vecinas que usa calcularSatisfaccion
+    Entradas: actual (puntero a la comuna de la cual se buscan las vecinas),
+              cantidadComunas (numero total de comunas en la lista circular),
+              tipo (1 = necesidad local, 2 = satisfaccion propia)
+    Salidas: promedio de las vecinas, o -1 si no hay comunas vecinas
+    */
+    float suma_vecinas = 0;
+    int cantidad_vecinas = 0;
+
+    if (cantidadComunas >= 5) { // Si hay 5 o mas comunas, se consideran las 4 vecinas mas cercanas
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, cantidadComunas - 2, cantidadComunas), tipo); // Vecina anterior
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas), tipo); // Vecina anterior
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, 1, cantidadComunas), tipo); // Vecina siguiente
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, 2, cantidadComunas), tipo); // Vecina siguiente
+        cantidad_vecinas = 4;
+    } else if (cantidadComunas == 4) { // Si hay 4 comunas, se consideran las 3 vecinas mas cercanas
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, cantidadComunas - 2, cantidadComunas), tipo); // Vecina anterior
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas), tipo); // Vecina anterior
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, 1, cantidadComunas), tipo); // Vecina siguiente
+        cantidad_vecinas = 3;
+    } else if (cantidadComunas == 3) { // Si hay 3 comunas, se consideran las 2 vecinas mas cercanas
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, cantidadComunas - 1, cantidadComunas), tipo); // Vecina anterior
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, 1, cantidadComunas), tipo); // Vecina siguiente
+        cantidad_vecinas = 2;
+    } else if (cantidadComunas == 2) { // Si hay 2 comunas, se considera la unica vecina
+        suma_vecinas = suma_vecinas + valorComunaVecina(avanzarComunas(actual, 1, cantidadComunas), tipo); // Vecina siguiente
+        cantidad_vecinas = 1;
+    }
+
+    if (cantidad_vecinas == 0) {
+        return -1;
+    }
+
+    return suma_vecinas / cantidad_vecinas;
+}
+
+float calcularNecesidad(struct Comuna *comuna, int cantidadComunas) {
+    /*
+    Funcionamiento: Calcula la necesidad de una comuna a partir de su necesidad local, la necesidad y la satisfaccion de sus comunas vecinas, y su reciprocidad
+    Entradas: comuna (puntero a la comuna de la cual se quiere calcular la necesidad),
+              cantidadComunas (numero total de comunas en la lista circular)
     Salidas: necesidad
     */
     float necesidad = 0;
     float necesidad_local = 0;
+    float necesidad_base = 0;
+    float promedio_necesidad_vecinas = 0;
+    float promedio_satisfaccion_vecinas = 0;
     float reciprocidad = 0;
     float necesidad_reciprocidad = 0;
 
     necesidad_local = calcularNecesidadLocal(comuna);
+    promedio_necesidad_vecinas = promedioVecinas(comuna, cantidadComunas, 1);
+    promedio_satisfaccion_vecinas = promedioVecinas(comuna, cantidadComunas, 2);
 
-    // Solo aumenta la necesidad si la comuna recibió más regalos de los que dio
+    // Si no hay vecinas, la necesidad base es solo la local. Si hay, se combina con la de las vecinas
+    if (promedio_necesidad_vecinas < 0) {
+        necesidad_base = necesidad_local;
+    } else {
+        necesidad_base = 0.6 * necesidad_local + 0.2 * promedio_necesidad_vecinas + 0.2 * (99 - promedio_satisfaccion_vecinas);
+    }
+
+    // Solo aumenta la necesidad si la comuna recibio mas regalos de los que dio
     reciprocidad = calcularReciprocidad(comuna);
     if (reciprocidad < 0) {
         necesidad_reciprocidad = 99 * (-reciprocidad);
     }
 
-    necesidad = necesidad_local + 0.15 * necesidad_reciprocidad;
+    necesidad = necesidad_base + 0.15 * necesidad_reciprocidad;
     if (necesidad > 99) {
         necesidad = 99;
     }
@@ -223,7 +288,7 @@ void actualizarIndices(struct Comuna *inicio, int cantidadComunas) {
     struct Comuna *comuna_inicial = inicio;
 
     while (1) {
-        calcularNecesidad(actual);
+        calcularNecesidad(actual, cantidadComunas);
         calcularSatisfaccion(actual, cantidadComunas);
 
         actual = actual->siguiente;
