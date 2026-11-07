@@ -85,6 +85,7 @@ struct Comuna {
     float satisfaccion; // Nivel de satisfacción de la comuna
     int regalosDados; // Cantidad de regalos que esta comuna ha dado
     int regalosRecibidos; // Cantidad de regalos que esta comuna ha recibido
+    int administrado; // 1 si el usuario administra esta comuna, 0 si se maneja de forma autonoma
     struct Comuna *siguiente;
 };
 

@@ -24,6 +24,49 @@ void mostrarLogo(void) {
     printf(COLOR_RESET);
 }
 
+void elegirComunasAdministradas(struct Comuna *inicio, int cantidadComunas) {
+    /*
+    Funcionamiento: muestra las comunas y le pide al usuario que elija 3 distintas
+    para administrar. Las demas quedan como autonomas.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular),
+              cantidadComunas (numero total de comunas)
+    Salidas: ninguna (marca administrado = 1 en las comunas elegidas)
+    */
+    struct Comuna *actual = inicio;
+    struct Comuna *elegida = NULL;
+    char error[100];
+    int numero = 0;
+    int elegidas = 0;
+
+    printf("Elija las 3 comunas que va a administrar. Las demas se manejan de forma autonoma\n");
+    for (int i = 1; i <= cantidadComunas; i++) {
+        printf("%d. %s\n", i, actual->nombre);
+        actual = actual->siguiente;
+    }
+    printf("-----------------------------------------------------------------------------------------------------\n");
+
+    while (elegidas < 3) {
+        printf("Comuna que administra (%d de 3): ", elegidas + 1);
+        if (scanf("%d", &numero) != 1) {
+            printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
+            scanf("%99s", error);
+            continue;
+        }
+        if (numero < 1 || numero > cantidadComunas) {
+            printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
+            continue;
+        }
+        elegida = avanzarComunas(inicio, numero - 1, cantidadComunas);
+        if (elegida->administrado == 1) {
+            printf(COLOR_AMARILLO "Esa comuna ya fue elegida.\n" COLOR_RESET);
+            continue;
+        }
+        elegida->administrado = 1;
+        elegidas = elegidas + 1;
+    }
+    printf("-----------------------------------------------------------------------------------------------------\n");
+}
+
 void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     /*
     Funcionamiento: guia al usuario para hacer un trueque: elige la comuna que solicita, la que provee, si es de servicios o bienes, que pide y cuanto. Luego llama a trueque y actualiza los indices.
@@ -50,7 +93,11 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     }
 
     for (int i = 1; i <= cantidadComunas; i++) {
-        printf("%d. %s\n", i, actual->nombre);
+        if (actual->administrado == 1) {
+            printf("%d. %s (administrada)\n", i, actual->nombre);
+        } else {
+            printf("%d. %s\n", i, actual->nombre);
+        }
         actual = actual->siguiente;
     }
     printf("-----------------------------------------------------------------------------------------------------\n");
@@ -74,6 +121,10 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     }
     solicitante = avanzarComunas(inicio, numero_solicitante - 1, cantidadComunas);
     proveedora = avanzarComunas(inicio, numero_proveedora - 1, cantidadComunas);
+    if (solicitante->administrado == 0) {
+        printf(COLOR_AMARILLO "Solo puede solicitar una comuna que usted administra.\n" COLOR_RESET);
+        return;
+    }
 
     printf("Tipo de trueque (1 = servicios, 2 = bienes): ");
     if (scanf("%d", &tipo) != 1) {
@@ -235,6 +286,14 @@ int main() {
         printf(COLOR_ROJO "No se pudo crear la sociedad.\n" COLOR_RESET);
         return 0;
     }
+
+    if (cantidad_comunas < 3) {
+        printf(COLOR_ROJO "Se necesitan al menos 3 comunas para poder administrar\n" COLOR_RESET);
+        liberarComunas(inicio);
+        return 0;
+    }
+
+    elegirComunasAdministradas(inicio, cantidad_comunas);
 
     actualizarIndices(inicio, cantidad_comunas);
 
