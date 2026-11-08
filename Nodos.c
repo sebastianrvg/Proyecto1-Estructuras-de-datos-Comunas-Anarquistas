@@ -41,8 +41,8 @@ struct Servicios *crearServicio(char nombre[], int cantidad, int cantidadMaxima)
     /*
     Funcionamiento: reserva memoria para un nuevo servicio y copia su nombre, cantidad y cantidad máxima.
     Entradas: nombre (texto con el nombre del servicio),
-              cantidad (cantidad actual del servicio),
-              cantidadMaxima (cantidad máxima que puede ser ofrecida)
+            cantidad (cantidad actual del servicio),
+            cantidadMaxima (cantidad máxima que puede ser ofrecida)
     Salidas: puntero al servicio creado
     */
     struct Servicios *nuevo;
@@ -58,7 +58,7 @@ struct Comuna *crearNodoCircular(struct Comuna *lista, char nombre[]) {
     /*
     Funcionamiento: reserva memoria para una nueva comuna y copia su nombre. Inserta la comuna en una lista circular de comunas.
     Entradas: lista (puntero al inicio de la lista circular de comunas),
-              nombre (texto con el nombre de la comuna)
+            nombre (texto con el nombre de la comuna)
     Salidas: puntero al inicio de la lista circular de comunas (puede ser la nueva comuna si la lista estaba vacía)
     */
     struct Comuna *nueva = NULL;
@@ -198,8 +198,7 @@ void mostrarPersonas(struct Persona *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista de recursos e imprime nombre, cantidad,
-cantidadMaxima y emergencias de cada uno.
+Funcionamiento: recorre la lista de recursos e imprime nombre, cantidad, cantidadMaxima y emergencias de cada uno.
 Entradas: lista (inicio de la lista)
 Salidas: ninguna (imprime en pantalla)
 */
@@ -215,8 +214,7 @@ void mostrarRecursos(struct Recursos *lista) {
 }
 
 /*
-Funcionamiento: recorre la lista de servicios e imprime nombre, cantidad,
-cantidadMaxima y emergencias de cada uno.
+Funcionamiento: recorre la lista de servicios e imprime nombre, cantidad, cantidadMaxima y emergencias de cada uno.
 Entradas: lista (inicio de la lista)
 Salidas: ninguna (imprime en pantalla)
 */

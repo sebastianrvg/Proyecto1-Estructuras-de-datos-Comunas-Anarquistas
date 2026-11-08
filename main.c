@@ -67,21 +67,35 @@ void elegirComunasAdministradas(struct Comuna *inicio, int cantidadComunas) {
     printf("-----------------------------------------------------------------------------------------------------\n");
 }
 
-void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
+struct Comuna *siguiente_administrado(struct Comuna *actual) {
     /*
-    Funcionamiento: guia al usuario para hacer un trueque: elige la comuna que solicita, la que provee, si es de servicios o bienes, que pide y cuanto. Luego llama a trueque y actualiza los indices.
+    Funcionamiento: avanza por la lista circular, ignorando las comunas que no se administran
+    Entradas: actual (comuna desde donde se empieza a avanzar)
+    Salidas: puntero a la siguiente comuna administrada
+    */
+    struct Comuna *siguiente = actual->siguiente;
+
+    while (siguiente->administrado == 0) {
+        siguiente = siguiente->siguiente;
+    }
+
+    return siguiente;
+}
+
+void menuTrueque(struct Comuna *inicio, int cantidadComunas, struct Comuna *solicitante) {
+    /*
+    Funcionamiento: guia al usuario para hacer un trueque: la comuna que solicita es la comuna actual, elige la que provee, si es de servicios o bienes, que pide y cuanto. Luego llama a trueque y actualiza los indices.
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
-              cantidadComunas (numero total de comunas)
+              cantidadComunas (numero total de comunas),
+              solicitante (comuna actual, una de las que el usuario administra)
     Salidas: ninguna (si algun dato no es valido, cancela el trueque)
     */
     struct Comuna *actual = inicio;
-    struct Comuna *solicitante = NULL;
     struct Comuna *proveedora = NULL;
     struct Servicios *servicio = NULL;
     struct Recursos *recurso = NULL;
     char nombre_item[50]; // Nombre del servicio o bien que se pide
     char error[100];
-    int numero_solicitante = 0;
     int numero_proveedora = 0;
     int tipo = 0; // 1 = servicios, 2 = bienes
     int opcion = 0; // Numero del servicio o bien elegido
@@ -102,12 +116,7 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
     }
     printf("-----------------------------------------------------------------------------------------------------\n");
 
-    printf("Numero de la comuna que solicita: ");
-    if (scanf("%d", &numero_solicitante) != 1) {
-        printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
-        scanf("%99s", error);
-        return;
-    }
+    printf("Solicita la comuna actual: %s\n", solicitante->nombre);
     printf("Numero de la comuna que provee: ");
     if (scanf("%d", &numero_proveedora) != 1) {
         printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
@@ -115,16 +124,11 @@ void menuTrueque(struct Comuna *inicio, int cantidadComunas) {
         return;
     }
     printf("-----------------------------------------------------------------------------------------------------\n");
-    if (numero_solicitante < 1 || numero_solicitante > cantidadComunas || numero_proveedora < 1 || numero_proveedora > cantidadComunas) {
+    if (numero_proveedora < 1 || numero_proveedora > cantidadComunas) {
         printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         return;
     }
-    solicitante = avanzarComunas(inicio, numero_solicitante - 1, cantidadComunas);
     proveedora = avanzarComunas(inicio, numero_proveedora - 1, cantidadComunas);
-    if (solicitante->administrado == 0) {
-        printf(COLOR_AMARILLO "Solo puede solicitar una comuna que usted administra.\n" COLOR_RESET);
-        return;
-    }
 
     printf("Tipo de trueque (1 = servicios, 2 = bienes): ");
     if (scanf("%d", &tipo) != 1) {
@@ -265,6 +269,7 @@ void menuDetalleComuna(struct Comuna *inicio, int cantidadComunas) {
 
 int main() {
     struct Comuna *inicio = NULL;
+    struct Comuna *comuna_actual = NULL; // Comuna administrada con la que se trabaja
     int i = -1;
     int cantidad_comunas = 0;
     int turnosHastaEmergencia = 0;
@@ -294,17 +299,23 @@ int main() {
     }
 
     elegirComunasAdministradas(inicio, cantidad_comunas);
+    comuna_actual = inicio;
+    if (comuna_actual->administrado == 0) {
+        comuna_actual = siguiente_administrado(comuna_actual);
+    }
 
     actualizarIndices(inicio, cantidad_comunas);
 
     while (i == -1) {
         printf(COLOR_CYAN "---------------------------------------------- Dia %02d -----------------------------------------------\n" COLOR_RESET, dia);
+        printf("Comuna actual: %s\n", comuna_actual->nombre);
         printf("1. Hacer un trueque\n");
         printf("2. Pasar al dia siguiente\n");
         printf("3. Ver comunas (necesidad y satisfaccion)\n");
         printf("4. Ver comunas en emergencia\n");
         printf("5. Ver detalle de una comuna (cantidad de cada bien o servicio)\n");
-        printf("6. Salir\n");
+        printf("6. Pasar a la siguiente comuna\n");
+        printf("7. Salir\n");
         printf("-----------------------------------------------------------------------------------------------------\n");
         printf("Elija una opcion: ");
         if (scanf("%d", &opcion) != 1) {
@@ -315,7 +326,7 @@ int main() {
 
         if (opcion == 1) {
             printf("---------------------------------------------- Trueque ----------------------------------------------\n");
-            menuTrueque(inicio, cantidad_comunas);
+            menuTrueque(inicio, cantidad_comunas, comuna_actual);
 
         } else if (opcion == 2) {
             printf("------------------------------------- Pasando al dia siguiente --------------------------------------\n");
@@ -336,9 +347,13 @@ int main() {
             menuDetalleComuna(inicio, cantidad_comunas);
 
         } else if (opcion == 6) {
+            comuna_actual = siguiente_administrado(comuna_actual);
+            printf("Se cambio de comuna: %s\n", comuna_actual->nombre);
+
+        } else if (opcion == 7) {
             printf(COLOR_MAGENTA "Saliendo.\n" COLOR_RESET);
             i = 0;
-
+        
         } else {
             printf(COLOR_AMARILLO "Opcion invalida.\n" COLOR_RESET);
         }
