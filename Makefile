@@ -10,7 +10,7 @@ CFLAGS = -Wall -Wextra -std=c99
 FUENTES_SIMULACION = main.c Nodos.c Sociedad.c Indices.c Consumo.c Emergencias.c Trueque.c Busqueda.c PasarDia.c Computadora.c
 
 # Archivos .c que necesita el demo de estructuras (su propio main, mas Nodos y Sociedad para liberar memoria)
-FUENTES_DEMO = DemoEstructuras.c Nodos.c Sociedad.c
+FUENTES_DEMO = DemoEstructuras.c Nodos.c Sociedad.c Chaflaneado.c
 
 all: prog
 
