@@ -153,6 +153,11 @@ int regalarRecursos(struct Comuna *comunaAfectada, int regalo) {
     // Recorrer las demas comunas hasta encontrar una que pueda regalar
     donante = comunaAfectada->siguiente;
     while (donante != comunaAfectada) {
+        // Las comunas administradas nunca regalan solas
+        if (donante->administrado == 1) {
+            donante = donante->siguiente;
+            continue;
+        }
         donante_recurso = buscarRecurso(donante->bienes, receptor_recurso->nombre);
         if (donante_recurso != NULL) {
             personas_donante = recorrerPersonas(donante->personas);
