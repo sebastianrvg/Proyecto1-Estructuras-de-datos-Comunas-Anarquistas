@@ -235,9 +235,9 @@ struct Comuna *crearSociedad(void) {
     int cantidadServicios = 0; // Servicios que elige el usuario
 
     // Leer los archivos base de comunas, bienes y servicios
-    disponibles = leerComunas("comunas");
-    bienes = leerRecursos("bienes");
-    servicios = leerServicios("servicios");
+    disponibles = leerComunas("datos/comunas");
+    bienes = leerRecursos("datos/bienes");
+    servicios = leerServicios("datos/servicios");
 
     totalComunas = recorrerComunas(disponibles);
     totalBienes = recorrerRecursos(bienes);
@@ -265,7 +265,7 @@ struct Comuna *crearSociedad(void) {
     liberarComunas(disponibles);
 
     // Leer las personas (cada una recibe un oficio entre 1 y la cantidad de servicios elegidos)
-    personas = leerPersonas("personas", cantidadServicios);
+    personas = leerPersonas("datos/personas", cantidadServicios);
     totalPersonas = recorrerPersonas(personas);
 
     // Cada comuna necesita al menos una persona

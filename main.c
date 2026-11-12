@@ -9,6 +9,7 @@
 #include "Emergencias.h"
 #include "Sociedad.h"
 #include "Colores.h"
+#include "Busquedatexto.h"
 
 void mostrarLogo(void) {
     /*
@@ -270,6 +271,10 @@ void menuDetalleComuna(struct Comuna *inicio, int cantidadComunas) {
 int main() {
     struct Comuna *inicio = NULL;
     struct Comuna *comuna_actual = NULL; // Comuna administrada con la que se trabaja
+    struct NombreLibro *libros = NULL; // Libros de la biblioteca
+    struct NodoChaflaneado *cache = NULL; // Arbol chaflaneado con las busquedas de texto ya hechas
+    struct NombreLibro *resultado = NULL; // Libros que contienen el texto buscado (la lista es del arbol)
+    char texto[100]; // Texto que se busca en los libros
     int i = -1;
     int cantidad_comunas = 0;
     int turnosHastaEmergencia = 0;
@@ -306,6 +311,9 @@ int main() {
 
     actualizarIndices(inicio, cantidad_comunas);
 
+    // Lista de libros de la biblioteca (una ruta por linea en el archivo "libros")
+    libros = leerNombresLibros("datos/libros");
+
     while (i == -1) {
         printf(COLOR_CYAN "---------------------------------------------- Dia %02d -----------------------------------------------\n" COLOR_RESET, dia);
         printf("Comuna actual: %s\n", comuna_actual->nombre);
@@ -315,7 +323,8 @@ int main() {
         printf("4. Ver comunas en emergencia\n");
         printf("5. Ver detalle de una comuna (cantidad de cada bien o servicio)\n");
         printf("6. Pasar a la siguiente comuna\n");
-        printf("7. Salir\n");
+        printf("7. Buscar texto en los libros\n");
+        printf("8. Salir\n");
         printf("-----------------------------------------------------------------------------------------------------\n");
         printf("Elija una opcion: ");
         if (scanf("%d", &opcion) != 1) {
@@ -351,6 +360,13 @@ int main() {
             printf("Se cambio de comuna: %s\n", comuna_actual->nombre);
 
         } else if (opcion == 7) {
+            printf("------------------------------------------ Buscar texto -------------------------------------------\n");
+            printf("Texto que desea buscar: ");
+            scanf(" %99[^\n]", texto);
+            cache = buscarTextoConCache(cache, libros, texto, &resultado);
+            mostrarNombresLibro(resultado);
+
+        } else if (opcion == 8) {
             printf(COLOR_MAGENTA "Saliendo.\n" COLOR_RESET);
             i = 0;
         
@@ -361,6 +377,8 @@ int main() {
 
     // Liberar toda la memoria de la sociedad antes de terminar
     liberarComunas(inicio);
+    liberarChaflaneado(cache);
+    liberarNombresLibro(libros);
 
     return 0;
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "Nodos.h"
 #include "Sociedad.h"
+#include "Chaflaneado.h"
 
 /*
 Este archivo no es parte de la simulacion. Es un programa aparte que
@@ -99,9 +100,45 @@ void demostrarListaCircular(void) {
     printf("Lista liberada.\n\n");
 }
 
+void demostrarArbolChaflaneado(void) {
+    /*
+    Funcionamiento: demuestra el arbol chaflaneado: inserta cinco textos y muestra el arbol despues de cada uno, busca un texto que esta abajo (para ver las rotaciones), busca uno que no existe y vuelve a buscar el primero
+    Entradas: ninguna
+    Salidas: ninguna (imprime en pantalla)
+    */
+    struct NodoChaflaneado *raiz = NULL;
+    char *textos[5] = {"mar", "luna", "sol", "rio", "viento"};
+    char *busquedas[3] = {"luna", "casa", "mar"};
+    int encontrado = 0;
+
+    printf("=== Arbol chaflaneado ===\n");
+    for (int i = 0; i < 5; i++) {
+        printf("Insertar \"%s\":\n", textos[i]);
+        raiz = insertarTexto(raiz, textos[i], agregarNombreLibro(NULL, "libro.txt"));
+        mostrarArbolChaflaneado(raiz, 0);
+        printf("\n");
+    }
+
+    for (int i = 0; i < 3; i++) {
+        printf("Buscar \"%s\":\n", busquedas[i]);
+        raiz = buscarTexto(raiz, busquedas[i], &encontrado);
+        if (encontrado == 1) {
+            printf("  Encontrado, ahora es la raiz\n");
+        } else {
+            printf("  No esta; queda en la raiz \"%s\", la mas cercana.\n", raiz->clave);
+        }
+        mostrarArbolChaflaneado(raiz, 0);
+        printf("\n");
+    }
+
+    liberarChaflaneado(raiz);
+    printf("Arbol liberado.\n\n");
+}
+
 int main(void) {
     demostrarListaSimple();
     demostrarListaCircular();
+    demostrarArbolChaflaneado();
 
     return 0;
 }
