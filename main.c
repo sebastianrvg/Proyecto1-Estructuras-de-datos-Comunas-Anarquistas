@@ -340,7 +340,7 @@ int main() {
         } else if (opcion == 2) {
             printf("------------------------------------- Pasando al dia siguiente --------------------------------------\n");
             printf("Las comunas consumieron bienes.\n");
-            pasarTurno(inicio, cantidad_comunas, &turnosHastaEmergencia);
+            pasarTurno(&inicio, &cantidad_comunas, &turnosHastaEmergencia, &comuna_actual);
             dia = dia + 1;
 
         } else if (opcion == 3) {

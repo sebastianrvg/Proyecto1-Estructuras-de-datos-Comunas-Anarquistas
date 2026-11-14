@@ -317,6 +317,84 @@ int comunaDebeDisolverse(struct Comuna *comuna) {
     return 0;
 }
 
+struct Comuna *disolverComuna(struct Comuna *inicio, int *cantidadComunas, struct Comuna *comuna, struct Comuna **comunaActual) {
+    /*
+    Funcionamiento: disuelve una comuna: todas sus personas pasan a la comuna siguiente (los servicios se van con ellas, porque dependen de las personas), sus bienes se abandonan (se liberan sin pasar a ningun lado), y el nodo se saca de la lista circular y se libera. Si la comuna disuelta era una de las administradas, la administracion pasa a otra comuna autonoma. No disuelve nada si quedarian 3 comunas o menos.
+    Entradas: inicio (puntero a cualquier comuna de la lista circular),
+              cantidadComunas (puntero a la cantidad total de comunas, se actualiza si se disuelve),
+              comuna (la comuna que se quiere disolver),
+              comunaActual (puntero a la comuna administrada que tiene seleccionada el usuario, se actualiza si era la disuelta)
+    Salidas: puntero al nuevo inicio de la lista circular (cambia si la comuna disuelta era el inicio)
+    */
+    struct Comuna *predecesor = comuna; // Nodo cuyo siguiente es la comuna a disolver
+    struct Comuna *destino = comuna->siguiente; // Comuna que recibe a las personas y la administracion si aplica
+    struct Comuna *nuevoInicio = inicio;
+    struct Comuna *reemplazo = NULL;
+    int era_administrada = comuna->administrado;
+    int personas_trasladadas = 0;
+
+    // No se disuelve nada si quedarian 3 comunas o menos: no se podrian administrar las 3 que pide el proyecto
+    if (*cantidadComunas <= 3) {
+        return inicio;
+    }
+
+    // Buscar el predecesor para poder sacar a la comuna de la lista circular
+    while (predecesor->siguiente != comuna) {
+        predecesor = predecesor->siguiente;
+    }
+
+    // Sacar la comuna de la lista circular
+    predecesor->siguiente = destino;
+
+    if (comuna == inicio) {
+        nuevoInicio = destino;
+    }
+
+    // Mover todas las personas de la comuna disuelta a la comuna siguiente (los servicios se van con ellas)
+    personas_trasladadas = recorrerPersonas(comuna->personas);
+    while (comuna->personas != NULL) {
+        struct Persona *nodo = comuna->personas;
+        comuna->personas = comuna->personas->siguiente;
+        nodo->siguiente = NULL;
+        destino->personas = insertarPersona(destino->personas, nodo);
+    }
+
+    // La comuna destino gano personas, hay que recalcular cuantas saben cada servicio
+    actualizarCantidadServicios(destino);
+
+    // Los bienes de la comuna disuelta se abandonan: se liberan sin pasar a ninguna otra comuna
+    liberarRecursos(comuna->bienes);
+    comuna->bienes = NULL;
+
+    // Los servicios de la comuna disuelta ya no corresponden a nadie, se liberan
+    liberarServicios(comuna->servicios);
+    comuna->servicios = NULL;
+
+    // Si la comuna disuelta era administrada, se le asigna la administracion a otra comuna autonoma
+    if (era_administrada == 1) {
+        reemplazo = destino;
+        while (reemplazo->administrado == 1) {
+            reemplazo = reemplazo->siguiente;
+        }
+        reemplazo->administrado = 1;
+
+        if (comunaActual != NULL && *comunaActual == comuna) {
+            *comunaActual = reemplazo;
+        }
+
+        printf(COLOR_AMARILLO "La comuna %s se disolvio: ahora se administra %s en su lugar.\n" COLOR_RESET, comuna->nombre, reemplazo->nombre);
+    } else if (comunaActual != NULL && *comunaActual == comuna) {
+        *comunaActual = destino;
+    }
+
+    printf(COLOR_ROJO "La comuna %s se disolvio por necesidad muy alta o satisfaccion muy baja. Sus %d personas pasaron a %s y sus bienes quedaron abandonados.\n" COLOR_RESET, comuna->nombre, personas_trasladadas, destino->nombre);
+
+    free(comuna);
+    *cantidadComunas = *cantidadComunas - 1;
+
+    return nuevoInicio;
+}
+
 // ==================== LIBERAR ====================
 
 /*

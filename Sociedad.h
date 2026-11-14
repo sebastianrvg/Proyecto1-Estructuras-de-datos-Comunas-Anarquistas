@@ -100,6 +100,16 @@ Salidas: 1 si debe disolverse, 0 si no
 */
 int comunaDebeDisolverse(struct Comuna *comuna);
 
+/*
+Funcionamiento: disuelve una comuna: todas sus personas pasan a la comuna siguiente (los servicios se van con ellas, porque dependen de las personas), sus bienes se abandonan (se liberan sin pasar a ningun lado), y el nodo se saca de la lista circular y se libera. Si la comuna disuelta era una de las administradas, la administracion pasa a otra comuna autonoma. No disuelve nada si quedarian 3 comunas o menos, porque no se podrian administrar las 3 que pide el proyecto.
+Entradas: inicio (puntero a cualquier comuna de la lista circular),
+          cantidadComunas (puntero a la cantidad total de comunas, se actualiza si se disuelve),
+          comuna (la comuna que se quiere disolver),
+          comunaActual (puntero a la comuna administrada que tiene seleccionada el usuario, se actualiza si era la disuelta)
+Salidas: puntero al nuevo inicio de la lista circular (cambia si la comuna disuelta era el inicio)
+*/
+struct Comuna *disolverComuna(struct Comuna *inicio, int *cantidadComunas, struct Comuna *comuna, struct Comuna **comunaActual);
+
 // LIBERAR
 
 /*
