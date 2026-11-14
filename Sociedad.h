@@ -19,6 +19,14 @@ entre este porcentaje de su máximo y el máximo completo.
 */
 #define PORCENTAJE_INICIAL_MINIMO 60
 
+/*
+Umbrales para disolver una comuna. La necesidad y la satisfacción van de 0 a
+99, así que una necesidad de 90 o más es "muy alta" y una satisfacción de 10
+o menos es "muy baja". Basta con que se cumpla uno de los dos.
+*/
+#define NECESIDAD_DISOLUCION 90
+#define SATISFACCION_DISOLUCION 10
+
 // PEDIR DATOS
 
 /*
@@ -82,6 +90,15 @@ Entradas: ninguna (los datos los pide al usuario)
 Salidas: puntero al inicio de la lista circular de comunas, o NULL si no se pudo crear (por ejemplo, si falta un archivo)
 */
 struct Comuna *crearSociedad(void);
+
+// DISOLVER
+
+/*
+Funcionamiento: revisa si una comuna debe disolverse: su necesidad llegó a NECESIDAD_DISOLUCION o más, o su satisfacción bajó a SATISFACCION_DISOLUCION o menos. Solo revisa los índices que ya tiene la comuna, no los recalcula.
+Entradas: comuna (comuna que se quiere revisar)
+Salidas: 1 si debe disolverse, 0 si no
+*/
+int comunaDebeDisolverse(struct Comuna *comuna);
 
 // LIBERAR
 

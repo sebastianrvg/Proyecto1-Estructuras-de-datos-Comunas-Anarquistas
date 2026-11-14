@@ -298,6 +298,25 @@ struct Comuna *crearSociedad(void) {
     return sociedad;
 }
 
+// ==================== DISOLVER ====================
+
+int comunaDebeDisolverse(struct Comuna *comuna) {
+    /*
+    Funcionamiento: revisa si una comuna debe disolverse: su necesidad llego a NECESIDAD_DISOLUCION o mas, o su satisfaccion bajo a SATISFACCION_DISOLUCION o menos. Solo revisa los indices que ya tiene la comuna, no los recalcula.
+    Entradas: comuna (comuna que se quiere revisar)
+    Salidas: 1 si debe disolverse, 0 si no
+    */
+    if (comuna->necesidad >= NECESIDAD_DISOLUCION) {
+        return 1;
+    }
+
+    if (comuna->satisfaccion <= SATISFACCION_DISOLUCION) {
+        return 1;
+    }
+
+    return 0;
+}
+
 // ==================== LIBERAR ====================
 
 /*
