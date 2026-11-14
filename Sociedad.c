@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Sociedad.h"
+#include "Busqueda.h"
 #include "Colores.h"
 
 // ==================== PEDIR DATOS ====================
@@ -187,7 +188,7 @@ void asignarRecursos(struct Comuna *comuna, struct Recursos *catalogo) {
 }
 
 /*
-Funcionamiento: le da a una comuna su propia copia de cada servicio del catalogo, conservando el oficio de cada uno. El maximo se calcula segun las personas de la comuna y la cantidad inicial es al azar entre el porcentaje inicial minimo y el maximo.
+Funcionamiento: le da a una comuna su propia copia de cada servicio del catalogo, conservando el oficio de cada uno. El maximo se calcula segun las personas de la comuna. La cantidad inicial ya no es al azar: es cuantas personas de la comuna saben ese oficio, porque el servicio esta ligado a las personas y no a la comuna.
 Entradas: comuna (comuna que recibe los servicios), catalogo (lista base de servicios)
 Salidas: ninguna (la comuna queda con su lista de servicios)
 */
@@ -196,20 +197,19 @@ void asignarServicios(struct Comuna *comuna, struct Servicios *catalogo) {
     struct Servicios *nuevo = NULL;
     int personas = recorrerPersonas(comuna->personas); // Personas de la comuna
     int maximo = 0; // Cantidad maxima del servicio en esta comuna
-    int minimo = 0; // Cantidad inicial mas baja posible
-    int cantidad = 0; // Cantidad inicial que se le da al servicio
 
     while (actual != NULL) {
         maximo = personas * FACTOR_MAXIMO_SERVICIOS;
-        minimo = maximo * PORCENTAJE_INICIAL_MINIMO / 100;
-        cantidad = minimo + rand() % (maximo - minimo + 1);
 
-        nuevo = crearServicio(actual->nombre, cantidad, maximo);
+        nuevo = crearServicio(actual->nombre, 0, maximo);
         nuevo->oficio = actual->oficio;
         comuna->servicios = insertarServicio(comuna->servicios, nuevo);
 
         actual = actual->siguiente;
     }
+
+    // La cantidad real de cada servicio es cuantas personas de la comuna lo saben hacer
+    actualizarCantidadServicios(comuna);
 }
 
 // ==================== CREAR LA SOCIEDAD ====================

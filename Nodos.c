@@ -337,7 +337,9 @@ struct Servicios *insertarServicio(struct Servicios *lista, struct Servicios *nu
 /*
 Funcionamiento: abre el archivo de personas, lee un nombre por línea y
 construye la lista enlazada simple completa. A cada persona le asigna un
-oficio al azar entre 1 y cantidadOficios.
+oficio al azar entre 1 y cantidadOficios, excepto a un porcentaje
+(PROBABILIDAD_SIN_OFICIO) que se queda sin ninguno (oficio 0): esas personas
+pueden aprender un oficio después, leyendo en la biblioteca.
 Entradas: nombreArchivo (ruta o nombre del archivo a leer),
 cantidadOficios (cantidad de servicios activos en la simulación)
 Salidas: puntero al inicio de la lista de personas cargada
@@ -363,8 +365,9 @@ struct Persona *leerPersonas(char nombreArchivo[], int cantidadOficios) {
             linea[longitud - 1] = '\0';
         }
         nueva = crearPersona(linea);
-        // Solo se asigna oficio si hay oficios disponibles (evita dividir entre 0)
-        if (cantidadOficios > 0) {
+        // Solo se asigna oficio si hay oficios disponibles (evita dividir entre 0),
+        // y solo si esta persona no cae en el porcentaje que se queda sin oficio
+        if (cantidadOficios > 0 && (rand() % 100) >= PROBABILIDAD_SIN_OFICIO) {
             nueva->oficio = (rand() % cantidadOficios) + 1;
         }
         lista = insertarPersona(lista, nueva);

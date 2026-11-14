@@ -306,6 +306,20 @@ int contarPersonasPorOficio(struct Persona *lista, int oficio) {
     return cantidad;
 }
 
+void actualizarCantidadServicios(struct Comuna *comuna) {
+    /*
+    Funcionamiento: la cantidad de un servicio ya no es un contador propio de la comuna, sino cuántas personas de esa comuna saben hacerlo. Esta función recalcula esa cantidad para cada servicio de la comuna, contando a las personas con ese oficio.
+    Entradas: comuna (comuna cuyos servicios se van a recalcular)
+    Salidas: ninguna (actualiza directamente la cantidad de cada servicio de la comuna)
+    */
+    struct Servicios *actual = comuna->servicios; // Puntero para recorrer la lista de servicios
+
+    while (actual != NULL) {
+        actual->cantidad = contarPersonasPorOficio(comuna->personas, actual->oficio);
+        actual = actual->siguiente;
+    }
+}
+
 void sacarPersonaPorOficio(struct Persona **lista, int oficio, struct Persona **sacada) {
     /*
     Funcionamiento: Saca de la lista a la primera persona que tenga el oficio indicado, sin liberar su memoria

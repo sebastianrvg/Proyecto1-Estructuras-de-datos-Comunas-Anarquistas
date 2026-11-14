@@ -224,7 +224,9 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
 
     int respuesta = 0; // Respuesta del usuario: 1 = continuar, 2 = no continuar, 0 = opcion no valida
 
-    int bono = 0; // Bono de reciprocidad que recibe cada comuna (las dos reciben la misma cantidad porque el trueque es 1 a 1)
+    // Nota: aqui ya no hay bono de reciprocidad como en bienes, porque la cantidad de un
+    // servicio no es un numero que se pueda inflar: es cuantas personas lo saben hacer,
+    // y eso se recalcula despues de trasladar a las personas, no se suma a mano
 
     // Validar que el trueque tenga sentido (comunas distintas y cantidad mayor que 0)
     if (validarTrueque(comunaSolicitante, comunaProveedora, cantidad_buscada) == 0) {
@@ -303,14 +305,10 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
         return;
     }
 
-    // Calcular el bono de reciprocidad (el mismo para ambas comunas)
-    bono = calcularBono(cantidad_buscada);
-
     // Mostrar el intercambio al usuario y pedirle confirmacion antes de hacerlo
     printf("Propuesta de trueque de servicios:\n");
     printf("  %s recibe %d de %s de parte de %s.\n", comunaSolicitante->nombre, cantidad_buscada, nombre_buscado, comunaProveedora->nombre);
     printf("  %s recibe %d de %s de parte de %s.\n", comunaProveedora->nombre, cantidad_buscada, B_servicio_pedido->nombre, comunaSolicitante->nombre);
-    printf("  Bono de reciprocidad: cada comuna recibe +%d.\n", bono);
     printf("-----------------------------------------------------------------------------------------------------\n");
     pedirConfirmacion(&respuesta);
     if (respuesta == 2) {
@@ -322,24 +320,13 @@ void truequeServicios(struct Comuna *comunaSolicitante, struct Comuna *comunaPro
         return;
     }
 
-    // Actualizar las cantidades de los servicios en ambas comunas después del trueque (1 a 1)
-    B_servicio_proveedora->cantidad = B_servicio_proveedora->cantidad - cantidad_buscada;
-    A_servicio_solicitante->cantidad = A_servicio_solicitante->cantidad - cantidad_buscada;
-
-    // Cada comuna recibe lo que pidio mas el bono de reciprocidad, sin pasar de su cantidad maxima
-    A_servicio_solicitante_recibe->cantidad = A_servicio_solicitante_recibe->cantidad + cantidad_buscada + bono;
-    if (A_servicio_solicitante_recibe->cantidad > A_servicio_solicitante_recibe->cantidadMaxima) {
-        A_servicio_solicitante_recibe->cantidad = A_servicio_solicitante_recibe->cantidadMaxima;
-    }
-
-    B_servicio_pedido->cantidad = B_servicio_pedido->cantidad + cantidad_buscada + bono;
-    if (B_servicio_pedido->cantidad > B_servicio_pedido->cantidadMaxima) {
-        B_servicio_pedido->cantidad = B_servicio_pedido->cantidadMaxima;
-    }
-
     // Trasladar a las personas: las del oficio pedido pasan a la comuna solicitante y las del oficio a cambio pasan a la comuna proveedora
     trasladarPersonas(comunaProveedora, comunaSolicitante, B_servicio_proveedora->oficio, cantidad_buscada);
     trasladarPersonas(comunaSolicitante, comunaProveedora, A_servicio_solicitante->oficio, cantidad_buscada);
+
+    // La cantidad de cada servicio ahora depende de quien quedo en cada comuna, no se suma a mano
+    actualizarCantidadServicios(comunaProveedora);
+    actualizarCantidadServicios(comunaSolicitante);
 
     printf(COLOR_VERDE "Trueque exitoso: %s le dio %d de %s a %s, y recibio %d de %s.\n" COLOR_RESET, comunaProveedora->nombre, cantidad_buscada, nombre_buscado, comunaSolicitante->nombre, cantidad_buscada, B_servicio_pedido->nombre);
 }

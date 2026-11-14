@@ -32,6 +32,13 @@ le regale recursos a la comuna afectada, y rango de la cantidad que se regala.
 #define REGALO_MINIMO 5
 #define REGALO_MAXIMO 10
 
+/*
+Probabilidad (en porcentaje) de que una persona no tenga ningún oficio al
+crearse. Las personas sin oficio son las que después pueden aprender uno
+nuevo leyendo en la biblioteca.
+*/
+#define PROBABILIDAD_SIN_OFICIO 20
+
 struct Recursos {
     /*
     Funcionamiento: Sirve para representar los recursos disponibles en la comuna, como alimentos, medicinas, herramientas, etc. 
