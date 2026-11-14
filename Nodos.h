@@ -68,6 +68,8 @@ Salidas: ninguna (es una definición de tipo)
 struct Persona {
     char nombre[50];
     int oficio; // Número del servicio al que pertenece la persona (0 si todavía no tiene)
+    int librosLeidos; // Libros que ha leido desde la ultima vez que aprendio algo
+    int oficioAprendido; // Servicio que aprendio leyendo en la biblioteca (0 si todavia no aprende ninguno)
     struct Persona *siguiente;
 };
 

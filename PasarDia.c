@@ -3,6 +3,7 @@
 #include "Indices.h"
 #include "Emergencias.h"
 #include "Computadora.h"
+#include "Aprendizaje.h"
 
 void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmergencia) {
     /*
@@ -14,6 +15,7 @@ void pasarTurno(struct Comuna *inicio, int cantidadComunas, int *turnosHastaEmer
     aplicarConsumoTodas(inicio);
     actualizarIndices(inicio, cantidadComunas);
     trueque_computadora(inicio, cantidadComunas);
+    leerEnBiblioteca(inicio, cantidadComunas);
     controlarEmergencias(inicio, cantidadComunas, turnosHastaEmergencia);
     actualizarIndices(inicio, cantidadComunas); // Otra vez, para que los indices muestren lo que dejo la emergencia y el posible regalo
 }
