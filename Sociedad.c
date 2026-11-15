@@ -233,6 +233,7 @@ struct Comuna *crearSociedad(void) {
     int cantidadComunas = 0; // Comunas que elige el usuario
     int cantidadBienes = 0; // Bienes que elige el usuario
     int cantidadServicios = 0; // Servicios que elige el usuario
+    int maximoServicios = 0; // Servicios que se pueden elegir (no mas que los bienes elegidos)
 
     // Leer los archivos base de comunas, bienes y servicios
     disponibles = leerComunas("datos/comunas");
@@ -255,7 +256,12 @@ struct Comuna *crearSociedad(void) {
     // Preguntarle al usuario las cantidades que va a usar la simulacion
     cantidadComunas = pedirCantidad("Cantidad de comunas", 2, totalComunas);
     cantidadBienes = pedirCantidad("Cantidad de bienes", 1, totalBienes);
-    cantidadServicios = pedirCantidad("Cantidad de servicios", 1, totalServicios);
+    // No puede haber mas servicios que bienes: cada servicio produce el bien de su misma posicion
+    maximoServicios = totalServicios;
+    if (maximoServicios > cantidadBienes) {
+        maximoServicios = cantidadBienes;
+    }
+    cantidadServicios = pedirCantidad("Cantidad de servicios", 1, maximoServicios);
     printf("-----------------------------------------------------------------------------------------------------\n");
 
     // Quedarse solo con lo que eligio el usuario

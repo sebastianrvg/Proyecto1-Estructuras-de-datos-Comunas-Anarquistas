@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "PasarDia.h"
 #include "Consumo.h"
@@ -6,6 +7,7 @@
 #include "Computadora.h"
 #include "Aprendizaje.h"
 #include "Sociedad.h"
+#include "FuncionAdicional.h"
 
 void pasarTurno(struct Comuna **inicio, int *cantidadComunas, int *turnosHastaEmergencia, struct Comuna **comunaActual) {
     /*
@@ -22,6 +24,8 @@ void pasarTurno(struct Comuna **inicio, int *cantidadComunas, int *turnosHastaEm
 
     aplicarConsumoTodas(*inicio);
     actualizarIndices(*inicio, *cantidadComunas);
+    producirBienes(*inicio, *cantidadComunas);
+    printf("---------------------------------------- Trueques autonomos -----------------------------------------\n");
     trueque_computadora(*inicio, *cantidadComunas);
     leerEnBiblioteca(*inicio, *cantidadComunas);
     controlarEmergencias(*inicio, *cantidadComunas, turnosHastaEmergencia);

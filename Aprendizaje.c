@@ -2,70 +2,49 @@
 #include <stdlib.h>
 #include "Aprendizaje.h"
 #include "Colores.h"
+#include "Busqueda.h"
 
-struct Servicios *elegirServicioNuevo(struct Persona *persona, struct Servicios *servicios) {
+struct Servicios *elegirServicioNuevo(struct Servicios *servicios) {
     /*
-    Funcionamiento: elige al azar uno de los servicios de la comuna que la persona todavia no tiene (distinto de su oficio)
-    Entradas: persona (persona que va a aprender), servicios (lista de servicios de su comuna)
-    Salidas: el servicio elegido, o NULL si no hay ninguno que pueda aprender
+    Funcionamiento: elige al azar uno de los servicios de la comuna, todos con la misma probabilidad
+    Entradas: servicios (lista de servicios de la comuna)
+    Salidas: el servicio elegido, o NULL si la comuna no tiene servicios
     */
     struct Servicios *actual = servicios;
-    int posibles = 0; // Servicios que la persona todavia no tiene
-    int elegido = 0; // Posicion al azar entre los posibles
+    int elegido = 0; // Posicion al azar dentro de la lista
 
-    while (actual != NULL) {
-        if (actual->oficio != persona->oficio) {
-            posibles = posibles + 1;
-        }
-        actual = actual->siguiente;
-    }
-
-    if (posibles == 0) {
+    if (servicios == NULL) {
         return NULL;
     }
 
-    elegido = rand() % posibles;
-    actual = servicios;
-    while (actual != NULL) {
-        if (actual->oficio != persona->oficio) {
-            if (elegido == 0) {
-                return actual;
-            }
-            elegido = elegido - 1;
-        }
+    elegido = rand() % recorrerServicios(servicios);
+    for (int i = 0; i < elegido; i++) {
         actual = actual->siguiente;
     }
 
-    return NULL;
+    return actual;
 }
 
 int aprenderServicio(struct Persona *persona, struct Servicios *servicios) {
     /*
-    Funcionamiento: la persona aprende un servicio nuevo al azar. Si no tenia oficio, ese pasa a ser su oficio; si ya tenia, queda como su servicio aprendido. El servicio de la comuna gana una persona mas que lo puede ofrecer
+    Funcionamiento: una persona sin oficio aprende un servicio al azar, que pasa a ser su oficio
     Entradas: persona (persona que aprende), servicios (lista de servicios de su comuna)
-    Salidas: 1 si aprendio un servicio, 0 si no habia ninguno nuevo para aprender
+    Salidas: 1 si aprendio un servicio, 0 si la comuna no tiene servicios
     */
-    struct Servicios *nuevo = elegirServicioNuevo(persona, servicios);
+    struct Servicios *nuevo = elegirServicioNuevo(servicios);
 
     if (nuevo == NULL) {
         return 0;
     }
 
-    if (persona->oficio == 0) {
-        persona->oficio = nuevo->oficio;
-    } else {
-        persona->oficioAprendido = nuevo->oficio;
-    }
-
-    nuevo->cantidad = nuevo->cantidad + 1;
-    nuevo->cantidadMaxima = nuevo->cantidadMaxima + 1;
+    persona->oficio = nuevo->oficio;
 
     return 1;
 }
 
 void leerEnBiblioteca(struct Comuna *inicio, int cantidadComunas) {
     /*
-    Funcionamiento: cada dia, cada persona tiene una probabilidad de ir a la biblioteca y leer un libro. Al llegar a 3 libros leidos aprende un servicio nuevo, si todavia no ha aprendido ninguno. Imprime una linea por cada comuna donde alguien aprendio
+    Funcionamiento: cada dia, cada persona sin oficio tiene una probabilidad de ir a la biblioteca y leer un libro. Al llegar a 3 libros leidos aprende un servicio, que pasa a ser su oficio, y la comuna recalcula cuantas personas ofrecen cada servicio. Imprime una linea por cada comuna donde alguien aprendio
     Entradas: inicio (puntero a cualquier comuna de la lista circular),
               cantidadComunas (numero total de comunas)
     Salidas: ninguna (actualiza las personas y los servicios de cada comuna)
@@ -79,8 +58,8 @@ void leerEnBiblioteca(struct Comuna *inicio, int cantidadComunas) {
         persona = comuna->personas;
 
         while (persona != NULL) {
-            // Solo leen las personas que todavia no aprendieron un servicio
-            if (persona->oficioAprendido == 0 && rand() % 100 < PROBABILIDAD_LECTURA) {
+            // Solo van a la biblioteca las personas que todavia no tienen oficio
+            if (persona->oficio == 0 && rand() % 100 < PROBABILIDAD_LECTURA) {
                 persona->librosLeidos = persona->librosLeidos + 1;
                 if (persona->librosLeidos >= LIBROS_PARA_APRENDER) {
                     persona->librosLeidos = 0;
@@ -91,6 +70,7 @@ void leerEnBiblioteca(struct Comuna *inicio, int cantidadComunas) {
         }
 
         if (aprendieron > 0) {
+            actualizarCantidadServicios(comuna);
             printf(COLOR_CYAN "En %s, %d persona(s) aprendieron un servicio nuevo en la biblioteca.\n" COLOR_RESET, comuna->nombre, aprendieron);
         }
         comuna = comuna->siguiente;
