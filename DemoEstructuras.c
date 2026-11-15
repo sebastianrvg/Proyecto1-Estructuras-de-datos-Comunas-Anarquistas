@@ -3,6 +3,7 @@
 #include "Nodos.h"
 #include "Sociedad.h"
 #include "Chaflaneado.h"
+#include "Arbol.h"
 
 /*
 Este archivo no es parte de la simulacion. Es un programa aparte que
@@ -135,10 +136,91 @@ void demostrarArbolChaflaneado(void) {
     printf("Arbol liberado.\n\n");
 }
 
+void demostrarArbolAvl(void) {
+    /*
+    Funcionamiento: demuestra el arbol AVL insertando nombres en un orden
+    pensado para forzar, una por una, las 4 rotaciones de balanceo (simple
+    izquierda, simple derecha, izquierda-derecha y derecha-izquierda),
+    mostrando el arbol despues de cada insercion para ver cuando rota. Al
+    final hace una busqueda exacta de un nombre que esta y de uno que no.
+    Entradas: ninguna
+    Salidas: ninguna (imprime en pantalla)
+    */
+    struct NodoAvl *raiz = NULL;
+    struct NodoAvl *encontrado = NULL;
+    int i = 0;
+
+    // c, b, a: al insertar "a" el nodo "c" queda con factor de balance 2
+    // (pesa a la izquierda), se corrige con una rotacion simple derecha
+    char *provocaDerecha[3] = {"c", "b", "a"};
+
+    // d, e, f: al insertar "f" el nodo "d" pesa a la derecha, se corrige
+    // con una rotacion simple izquierda
+    char *provocaIzquierda[3] = {"d", "e", "f"};
+
+    // aa, ab: "b" queda pesando a la izquierda pero por el hijo derecho de
+    // "aa", asi que primero hay que rotar "aa" a la izquierda y despues
+    // rotar "b" a la derecha (rotacion doble izquierda-derecha)
+    char *provocaIzquierdaDerecha[2] = {"aa", "ab"};
+
+    // ff, fe: mismo caso que el anterior pero al espejo (rotacion doble
+    // derecha-izquierda)
+    char *provocaDerechaIzquierda[2] = {"ff", "fe"};
+
+    printf("=== Arbol AVL ===\n");
+
+    printf("Forzando rotacion simple derecha:\n");
+    for (i = 0; i < 3; i++) {
+        raiz = insertar_avl(raiz, provocaDerecha[i]);
+        printf("Insertar \"%s\":\n", provocaDerecha[i]);
+        mostrar_arbol_avl(raiz, 0);
+    }
+    printf("\n");
+
+    printf("Forzando rotacion simple izquierda:\n");
+    for (i = 0; i < 3; i++) {
+        raiz = insertar_avl(raiz, provocaIzquierda[i]);
+        printf("Insertar \"%s\":\n", provocaIzquierda[i]);
+        mostrar_arbol_avl(raiz, 0);
+    }
+    printf("\n");
+
+    printf("Forzando rotacion doble izquierda-derecha:\n");
+    for (i = 0; i < 2; i++) {
+        raiz = insertar_avl(raiz, provocaIzquierdaDerecha[i]);
+        printf("Insertar \"%s\":\n", provocaIzquierdaDerecha[i]);
+        mostrar_arbol_avl(raiz, 0);
+    }
+    printf("\n");
+
+    printf("Forzando rotacion doble derecha-izquierda:\n");
+    for (i = 0; i < 2; i++) {
+        raiz = insertar_avl(raiz, provocaDerechaIzquierda[i]);
+        printf("Insertar \"%s\":\n", provocaDerechaIzquierda[i]);
+        mostrar_arbol_avl(raiz, 0);
+    }
+    printf("\n");
+
+    printf("Insertar \"c\" otra vez (ya existe, no se duplica):\n");
+    raiz = insertar_avl(raiz, "c");
+    mostrar_arbol_avl(raiz, 0);
+    printf("\n");
+
+    encontrado = buscar_avl(raiz, "aa");
+    printf("Buscar \"aa\": %s\n", encontrado != NULL ? "encontrado" : "no encontrado");
+
+    encontrado = buscar_avl(raiz, "zzz");
+    printf("Buscar \"zzz\": %s\n", encontrado != NULL ? "encontrado" : "no encontrado");
+
+    liberar_avl(raiz);
+    printf("Arbol liberado.\n\n");
+}
+
 int main(void) {
     demostrarListaSimple();
     demostrarListaCircular();
     demostrarArbolChaflaneado();
+    demostrarArbolAvl();
 
     return 0;
 }

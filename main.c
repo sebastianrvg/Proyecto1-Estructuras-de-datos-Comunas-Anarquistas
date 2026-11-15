@@ -10,6 +10,7 @@
 #include "Sociedad.h"
 #include "Colores.h"
 #include "Busquedatexto.h"
+#include "Arbol.h"
 
 void mostrarLogo(void) {
     /*
@@ -274,7 +275,10 @@ int main() {
     struct NombreLibro *libros = NULL; // Libros de la biblioteca
     struct NodoChaflaneado *cache = NULL; // Arbol chaflaneado con las busquedas de texto ya hechas
     struct NombreLibro *resultado = NULL; // Libros que contienen el texto buscado (la lista es del arbol)
+    struct NodoAvl *raizAvl = NULL; // Arbol AVL con los nombres de los libros, para busqueda exacta
+    struct NodoAvl *libroEncontrado = NULL;
     char texto[100]; // Texto que se busca en los libros
+    char nombreBuscado[100]; // Nombre exacto de libro que se busca en el AVL
     int i = -1;
     int cantidad_comunas = 0;
     int turnosHastaEmergencia = 0;
@@ -314,6 +318,16 @@ int main() {
     // Lista de libros de la biblioteca (una ruta por linea en el archivo "libros")
     libros = leerNombresLibros("datos/libros");
 
+    // Arbol AVL con los mismos nombres, para poder buscar un libro exacto
+    // en tiempo logaritmico (la lista de arriba se recorreria de uno en uno)
+    {
+        struct NombreLibro *recorridoLibros = libros;
+        while (recorridoLibros != NULL) {
+            raizAvl = insertar_avl(raizAvl, recorridoLibros->nombre);
+            recorridoLibros = recorridoLibros->siguiente;
+        }
+    }
+
     while (i == -1) {
         printf(COLOR_CYAN "---------------------------------------------- Dia %02d -----------------------------------------------\n" COLOR_RESET, dia);
         printf("Comuna actual: %s\n", comuna_actual->nombre);
@@ -324,7 +338,8 @@ int main() {
         printf("5. Ver detalle de una comuna (cantidad de cada bien o servicio)\n");
         printf("6. Pasar a la siguiente comuna\n");
         printf("7. Buscar texto en los libros\n");
-        printf("8. Salir\n");
+        printf("8. Buscar un libro por nombre exacto\n");
+        printf("9. Salir\n");
         printf("-----------------------------------------------------------------------------------------------------\n");
         printf("Elija una opcion: ");
         if (scanf("%d", &opcion) != 1) {
@@ -367,6 +382,17 @@ int main() {
             mostrarNombresLibro(resultado);
 
         } else if (opcion == 8) {
+            printf("------------------------------------ Buscar libro por nombre -----------------------------------\n");
+            printf("Nombre exacto del libro: ");
+            scanf(" %99[^\n]", nombreBuscado);
+            libroEncontrado = buscar_avl(raizAvl, nombreBuscado);
+            if (libroEncontrado != NULL) {
+                printf(COLOR_VERDE "Encontrado: %s\n" COLOR_RESET, libroEncontrado->nombre);
+            } else {
+                printf(COLOR_AMARILLO "No hay ningun libro con ese nombre exacto.\n" COLOR_RESET);
+            }
+
+        } else if (opcion == 9) {
             printf(COLOR_MAGENTA "Saliendo.\n" COLOR_RESET);
             i = 0;
         
@@ -379,6 +405,7 @@ int main() {
     liberarComunas(inicio);
     liberarChaflaneado(cache);
     liberarNombresLibro(libros);
+    liberar_avl(raizAvl);
 
     return 0;
 }
