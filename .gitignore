@@ -54,6 +54,18 @@ dkms.conf
 # debug information files
 *.dwo
 
+# Libros de prueba:
+pruebas/el_rio.txt
+pruebas/la_huerta.txt
+pruebas/el_taller.txt
+pruebas/don_quijote.txt
+pruebas/marianela.txt
+pruebas/platero_y_yo.txt
+pruebas/lazarillo_de_tormes.txt
+pruebas/cuentos_de_amor.txt
+pruebas/abel_sanchez.txt
+pruebas/rimas.txt
+
 # Ejecutables del proyecto
 prog
 demo
