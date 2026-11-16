@@ -355,7 +355,10 @@ int main() {
         } else if (opcion == 2) {
             printf("------------------------------------- Pasando al dia siguiente --------------------------------------\n");
             printf("Las comunas consumieron bienes.\n");
-            pasarTurno(&inicio, &cantidad_comunas, &turnosHastaEmergencia, &comuna_actual);
+            if (pasarTurno(&inicio, &cantidad_comunas, &turnosHastaEmergencia, &comuna_actual) == 1) {
+                printf(COLOR_MAGENTA "Fin de la simulacion: la sociedad duro %d dias.\n" COLOR_RESET, dia);
+                i = 0;
+            }
             dia = dia + 1;
 
         } else if (opcion == 3) {

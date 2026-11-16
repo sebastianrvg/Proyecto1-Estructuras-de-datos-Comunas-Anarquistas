@@ -13,6 +13,6 @@ Entradas: inicio (puntero al puntero de cualquier comuna de la lista circular, s
           comunaActual (puntero a la comuna administrada seleccionada por el usuario, se actualiza si era la disuelta)
 Salidas: ninguna
 */
-void pasarTurno(struct Comuna **inicio, int *cantidadComunas, int *turnosHastaEmergencia, struct Comuna **comunaActual);
+int pasarTurno(struct Comuna **inicio, int *cantidadComunas, int *turnosHastaEmergencia, struct Comuna **comunaActual);
 
 #endif

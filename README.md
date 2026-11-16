@@ -1,14 +1,14 @@
 
 # Comunas Anarquistas
 
-Proyecto 1 del curso de Estructuras de Datos. Simulación en C de una sociedad solarpunk organizada en comunas anarquistas que gestionan personas, bienes y servicios, y que se ayudan mediante trueque y regalo, sin usar dinero. El éxito de la sociedad se mide con la satisfacción de las personas.
+Proyecto 2 del curso de Estructuras de Datos, "Bibliotecas Anarquistas", que extiende el proyecto 1. Simulación en C de una sociedad solarpunk organizada en comunas anarquistas que gestionan personas, bienes y servicios, y que se ayudan mediante trueque y regalo, sin usar dinero. El usuario administra 3 comunas y las demás actúan solas; cada comuna tiene una biblioteca donde se buscan textos y se aprenden oficios. El éxito de la sociedad se mide con la satisfacción de las personas.
 
 - **Integrantes:** Gustavo López y Sebastián Rodríguez
 - **Repositorio:** https://github.com/sebastianrvg/Proyecto1-Estructuras-de-datos-Comunas-Anarquistas
 
 ## Cómo compilar y ejecutar
 
-Requiere gcc y  make. El programa lee los archivos comunas, personas, bienes y servicios del **directorio actual**, así que hay que ejecutarlo desde la carpeta del proyecto.
+Requiere gcc y make. El programa lee los archivos comunas, personas, bienes, servicios y libros de la carpeta **datos**, y los libros de prueba de la carpeta **pruebas**, así que hay que ejecutarlo desde la carpeta del proyecto.
 
 ```
 make          # compila la simulación completa (ejecutable: prog)
@@ -18,14 +18,17 @@ make demo     # compila el demo de las estructuras (ejecutable: demo)
 make clean    # borra los ejecutables
 ```
 
-Al iniciar, el programa pide cuántas comunas (2 a 50), cuántos bienes (1 a 25) y cuántos servicios (1 a 25) tendrá la sociedad. Después muestra un menú que se repite cada día:
+Al iniciar, el programa pide cuántas comunas (al menos 3), cuántos bienes (1 a 25) y cuántos servicios tendrá la sociedad; no puede haber más servicios que bienes, porque cada servicio produce el bien de su misma posición. Luego se eligen las 3 comunas que el usuario administra. Después muestra un menú que se repite cada día:
 
-1. Hacer un trueque
+1. Hacer un trueque (la comuna que pide es la comuna administrada actual)
 2. Pasar al día siguiente
 3. Ver comunas (necesidad y satisfacción)
 4. Ver comunas en emergencia
-5. Ver detalle de una comuna (cantidad de cada bien o servicio)
-6. Salir
+5. Ver detalle de una comuna (cantidad de cada bien o servicio, regalos y reciprocidad)
+6. Pasar a la siguiente comuna administrada
+7. Buscar texto en los libros (con caché en el árbol chaflaneado)
+8. Buscar un libro por nombre exacto (árbol AVL)
+9. Salir
 
 Ejemplo de un trueque (los números cambian en cada ejecución porque hay azar):
 
@@ -39,34 +42,74 @@ Desea continuar con el intercambio? (1 = si, 2 = no):
 Trueque exitoso: Meleruk le dio 1 de Agua a Conte Burica, y recibio 5 de Arroz.
 ```
 
-Para una demostración se recomienda usar entre 5 y 10 comunas con 6 bienes y 6 servicios.
+Para una demostración se recomienda usar 5 comunas con 6 bienes y 6 servicios, porque cada día se muestra la producción de cada comuna.
 
 ## Archivos de datos
 
-| Archivo   | Contenido              | Cantidad |
-| --------- | ---------------------- | -------- |
-| personas  | un nombre por línea   | 500      |
-| comunas   | un nombre por línea   | 50       |
-| bienes    | un bien por línea     | 25       |
-| servicios | un servicio por línea | 25       |
+| Archivo         | Contenido                      | Cantidad |
+| --------------- | ------------------------------ | -------- |
+| datos/personas  | un nombre por línea           | 500      |
+| datos/comunas   | un nombre por línea           | 50       |
+| datos/bienes    | un bien por línea             | 25       |
+| datos/servicios | un servicio por línea         | 25       |
+| datos/libros    | la ruta de un libro por línea | 3        |
+| pruebas/        | libros de prueba (.txt)        | 3        |
 
-Los nombres de línea no deben pasar de 48 caracteres, y los archivos no llevan extensión.
+Los nombres de línea no deben pasar de 48 caracteres, y los archivos de datos no llevan extensión. El servicio en la posición N produce el bien en la posición N. Para usar otro corpus de libros solo hay que cambiar las rutas de datos/libros.
 
 ## Organización del código
 
-| Archivo           | Qué contiene                                                                                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nodos.c/.h        | Las estructuras (Persona,Recursos,Servicios,Comuna), insertar, recorrer, leer los archivos y avanzarComunas.                                            |
-| Sociedad.c/.h     | crearSociedad: pide las cantidades, elige las comunas, reparte las personas, calcula los máximos y libera la memoria (liberarComunas).                 |
-| Indices.c/.h      | Fórmulas de necesidad y satisfacción, y actualizarIndices.                                                                                            |
-| Consumo.c/.h      | Consumo diario de bienes.                                                                                                                               |
-| Emergencias.c/.h  | Emergencias aleatorias, regalo tras una emergencia y la lista de comunas en emergencia.                                                                 |
-| Trueque.c/.h      | Trueque de bienes y de servicios, y el bono de reciprocidad.                                                                                            |
-| Busqueda.c/.h     | Búsquedas en las listas, cálculo de puntos, verificación de si una comuna puede dar algo sin quedar en riesgo, traslado de personas y confirmación. |
-| PasarDia.c/.h     | pasarTurno: lo que ocurre al pasar un día.                                                                                                             |
-| DemoEstructuras.c | Programa aparte que demuestra la lista simple y la lista circular.                                                                                      |
-| Colores.h         | Códigos de color para la terminal.                                                                                                                     |
-| main.c            | Menú principal, menú del trueque y detalle de una comuna.                                                                                             |
+| Archivo               | Qué contiene                                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nodos.c/.h            | Las estructuras (Persona,Recursos,Servicios,Comuna), insertar, recorrer, leer los archivos y avanzarComunas.                                            |
+| Sociedad.c/.h         | crearSociedad: pide las cantidades, elige las comunas, reparte las personas, calcula los máximos y libera la memoria (liberarComunas).                 |
+| Indices.c/.h          | Fórmulas de necesidad y satisfacción, y actualizarIndices.                                                                                            |
+| Consumo.c/.h          | Consumo diario de bienes.                                                                                                                               |
+| Emergencias.c/.h      | Emergencias aleatorias, regalo tras una emergencia y la lista de comunas en emergencia.                                                                 |
+| Trueque.c/.h          | Trueque de bienes y de servicios, y el bono de reciprocidad.                                                                                            |
+| Busqueda.c/.h         | Búsquedas en las listas, cálculo de puntos, verificación de si una comuna puede dar algo sin quedar en riesgo, traslado de personas y confirmación. |
+| PasarDia.c/.h         | pasarTurno: lo que ocurre al pasar un día, la disolución de comunas y el fracaso de la sociedad.                                                      |
+| Computadora.c/.h      | Trueques automáticos de las comunas autónomas.                                                                                                        |
+| Chaflaneado.c/.h      | Árbol chaflaneado (splay): insertar, buscar y las rotaciones zig, zig-zig y zig-zag.                                                                   |
+| Busquedatexto.c/.h    | Búsqueda de texto en los libros usando el árbol chaflaneado como caché.                                                                              |
+| Arbol.c/.h            | Árbol AVL con los nombres de los libros, para buscar un libro por nombre exacto.                                                                       |
+| Aprendizaje.c/.h      | Personas sin oficio que leen en la biblioteca y aprenden un servicio.                                                                                   |
+| FuncionAdicional.c/.h | Funcionalidad adicional: producción de bienes por oficio y regalo de excedentes.                                                                       |
+| DemoEstructuras.c     | Programa aparte que demuestra la lista simple, la lista circular, el árbol chaflaneado y el árbol AVL.                                                |
+| Colores.h             | Códigos de color para la terminal.                                                                                                                     |
+| main.c                | Menú principal, elección de las 3 comunas administradas, menú del trueque y detalle de una comuna.                                                   |
+
+## Lo nuevo del proyecto 2
+
+### Comunas administradas y autónomas
+
+Al iniciar, el usuario elige 3 comunas para administrar (campo `administrado` en cada comuna). La opción 6 avanza por la lista circular hasta la siguiente comuna administrada, como un reloj, y los trueques del usuario siempre los pide la comuna actual. Las demás comunas son autónomas: cada día la computadora hace sus trueques sin preguntar. Cada autónoma pide primero su bien con menos cantidad y después cada bien en emergencia, hasta tener 2 turnos de consumo más 1; si ninguna acepta, baja lo que pide de 2 en 2 hasta 1. Las autónomas solo intercambian entre ellas, y las comunas administradas nunca regalan por su cuenta: sus recursos solo se mueven cuando el usuario decide.
+
+### Índices con vecinas y reciprocidad
+
+Cada comuna cuenta los regalos que dio y que recibió. La **reciprocidad** es (dados − recibidos) / (dados + recibidos), entre −1 y 1.
+
+**Necesidad.** La necesidad local es la de la fórmula del proyecto 1. La necesidad final es 60 % la local, 20 % la necesidad local promedio de las vecinas y 20 % lo que les falta a las vecinas para estar satisfechas (99 − su satisfacción). Si la reciprocidad es negativa (recibe más de lo que da), se le suma hasta un 15 % extra. Nunca pasa de 99.
+
+### Disolución y fracaso
+
+Una comuna con necesidad de 90 o más, o satisfacción de 10 o menos, se disuelve: sus personas pasan a la comuna siguiente y sus bienes se pierden. Si era administrada, el usuario pasa a administrar otra comuna. Si una comuna tiene que disolverse cuando ya solo quedan 3, la sociedad fracasa y la simulación termina.
+
+### Servicios por persona
+
+La cantidad de un servicio es cuántas personas de la comuna tienen ese oficio, así que en un trueque de servicios se trasladan personas. Al crearse, el 20 % de las personas no tiene oficio.
+
+### Biblioteca
+
+- **Aprender un servicio:** cada día, cada persona sin oficio tiene un 20 % de probabilidad de leer un libro; al leer 3, aprende un servicio al azar, que pasa a ser su oficio.
+- **Búsqueda de texto (opción 7):** primero se busca el texto en un **árbol chaflaneado** que funciona como caché. Si está, se usa el resultado guardado sin abrir los libros; si no, se leen los libros línea por línea y el resultado se guarda en el árbol. El árbol imprime cada rotación, así se ve que está chaflaneando: lo que se busca más seguido queda cerca de la raíz.
+- **Búsqueda por nombre (opción 8):** los nombres de los libros se guardan en un **árbol AVL**, que se mantiene balanceado y encuentra un nombre exacto en tiempo logarítmico.
+
+### Funcionalidad adicional: producción de bienes
+
+Cada servicio produce el bien de su misma posición. Cada día, cada persona con oficio produce 2 unidades por cada servicio de la simulación (así la producción total no depende de cuántos servicios se elijan). La producción sube un 20 % si la necesidad es alta (más de 66) y un 20 % si la satisfacción es alta, y baja un 20 % en cada caso si son bajas (menos de 33). Lo que pase del máximo se regala a otras comunas, en orden, sin que pasen de su propio máximo, y cuenta como regalo para la reciprocidad. Cada día se muestra cuánto produjo cada comuna de cada bien.
+
+Se escogió este valor con simulaciones (15 partidas de 60 días con 10 comunas, sin trueques del usuario): sin producción, todos los bienes están en emergencia al día 20; con producción, solo el 7 % lo está al día 20 y el 55 % al día 30. La producción retrasa las crisis, pero no las evita, así que los trueques siguen siendo necesarios.
 
 ## Concepto del proyecto
 
@@ -105,12 +148,14 @@ Los dos mecanismos reflejan dos formas complementarias de solidaridad económica
 
 - **Lista enlazada simple** para las personas, los bienes y los servicios. Solo necesitan recorrerse hacia adelante, insertarse y, a veces, sacar un nodo del medio (por ejemplo al trasladar una persona de una comuna a otra en un trueque de servicios). No hace falta volver atrás ni una referencia circular.
 - **Lista enlazada circular** para las comunas. Las comunas tienen una noción de vecindad: la satisfacción de una comuna depende en parte de sus vecinas, y las emergencias graves afectan a la comuna anterior y a la siguiente. En una lista circular, la que sigue a la última es la primera, sin casos especiales. La función avanzarComunas recibe cuántos pasos avanzar y el total de comunas, y calcula la posición final con un módulo (%), así que funciona sin importar cuántas vueltas se den.
+- **Árbol chaflaneado (splay)** para la caché de búsquedas de texto: cada búsqueda sube el texto a la raíz, así que lo reciente y frecuente se encuentra más rápido.
+- **Árbol AVL** para los nombres de los libros: siempre está balanceado, y buscar un nombre exacto cuesta O(log n).
 
-Cada estructura se usa porque lo que representa encaja con ella, y no solo para cumplir el requisito de tener dos tipos. make demo ejecuta un programa aparte que muestra las dos funcionando por separado.
+Cada estructura se usa porque lo que representa encaja con ella. make demo ejecuta un programa aparte que muestra las cuatro funcionando por separado.
 
 ### Sistema de oficios
 
-Cada servicio tiene un número de oficio, que es su posición en el archivo servicios. Cada persona recibe al azar un número de oficio entre 1 y la cantidad de servicios elegidos. Así se puede saber cuántas personas de una comuna tienen un oficio comparando números en vez de texto. Esto es lo que hace posible el trueque de servicios: cuando una comuna da un servicio, en realidad presta personas con ese oficio, y el programa verifica que de verdad tenga suficientes antes de aceptar el trueque.
+Cada servicio tiene un número de oficio, que es su posición en el archivo servicios. Cada persona recibe al azar un número de oficio entre 1 y la cantidad de servicios elegidos, o ninguno (oficio 0) con un 20 % de probabilidad. Así se puede saber cuántas personas de una comuna tienen un oficio comparando números en vez de texto. Esto es lo que hace posible el trueque de servicios: cuando una comuna da un servicio, en realidad presta personas con ese oficio, y el programa verifica que de verdad tenga suficientes antes de aceptar el trueque.
 
 ### Cantidades máximas e iniciales
 
@@ -123,7 +168,7 @@ Cada bien y servicio tiene una cantidad máxima que depende de las personas de l
 
 ### Fórmulas
 
-**Necesidad.** Para los bienes se suman las cantidades actuales y las máximas de todos, y se calcula la fracción que falta para llegar al máximo; se hace igual con los servicios. La necesidad es 99 por el promedio de las dos fracciones, así que nunca llega a 100.
+**Necesidad local.** Para los bienes se suman las cantidades actuales y las máximas de todos, y se calcula la fracción que falta para llegar al máximo; se hace igual con los servicios. La necesidad es 99 por el promedio de las dos fracciones, así que nunca llega a 100.
 
 **Satisfacción propia.** Cada bien o servicio recibe puntos según cuánto tiene:
 
@@ -138,7 +183,7 @@ Estas fórmulas no usan azar: dado el mismo estado de una comuna, siempre dan el
 
 ## Extras
 
-Logo de texto al iniciar, colores en la terminal para distinguir los mensajes (rojo para emergencias, verde para trueques exitosos, amarillo para avisos y opciones inválidas, cian para el encabezado de cada día, magenta para el logo y la salida), confirmación antes de cada trueque, traslado de personas con su oficio en los trueques de servicios, regalo tras una emergencia, y el programa aparte DemoEstructuras que demuestra las dos estructuras.
+Logo de texto al iniciar, colores en la terminal para distinguir los mensajes (rojo para emergencias, verde para trueques exitosos, amarillo para avisos y opciones inválidas, cian para el encabezado de cada día, magenta para el logo y la salida), confirmación antes de cada trueque, traslado de personas con su oficio en los trueques de servicios, regalo tras una emergencia, y el programa aparte DemoEstructuras que demuestra las listas y los dos árboles.
 
 ## Referencias
 
